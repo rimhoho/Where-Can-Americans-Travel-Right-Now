@@ -1,0 +1,116 @@
+/* map */
+#map {
+  width: 100vw;
+  height: 80vh;
+  background-color: #98b2cf;;
+}
+svg rect {
+  fill: #98b2cf;   /* map background colour */
+}
+.country{
+  fill: #f1f1ee;   /* country colour */
+  stroke: #5172973d; /* country border colour */
+  stroke-width: 1.2; /* country border width */
+}
+.country-on{
+  stroke: #000;/* #77cfbc;   highlight colour for selected country */
+  stroke-width: .4;
+}
+.countryLabel{
+  display: none;   /* hide all country labels by default */
+}
+.countryName{
+  fill: #FFFAFF;   /* country label text colour */
+}
+.countryLabelBg{
+  fill: #30BCED;   /* country label background colour */
+}
+
+/* others */
+.title {font-size: 1.1rem; line-height: 2rem;}
+.bubble {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 142px;
+    height: 40px;
+    margin: -20px 0 0 -71px;
+    background: #f8f9fa;
+    filter: contrast(20);
+  }
+  .bubble .dot {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 12px;
+    left: 15px;
+    filter: blur(4px);
+    background: #000;
+    border-radius: 50%;
+    transform: translateX(0);
+    animation: dot 2.8s infinite;
+  }
+  .bubble .dots {
+    transform: translateX(0);
+    margin-top: 12px;
+    margin-left: 31px;
+    animation: dots 2.8s infinite;
+  }
+  .bubble .dots span {
+    display: block;
+    float: left;
+    width: 16px;
+    height: 16px;
+    margin-left: 16px;
+    filter: blur(4px);
+    background: #000;
+    border-radius: 50%;
+  }
+  @-moz-keyframes dot {
+    50% {
+      transform: translateX(96px);
+    }
+  }
+  @-webkit-keyframes dot {
+    50% {
+      transform: translateX(96px);
+    }
+  }
+  @-o-keyframes dot {
+    50% {
+      transform: translateX(96px);
+    }
+  }
+  @keyframes dot {
+    50% {
+      transform: translateX(96px);
+    }
+  }
+  @-moz-keyframes dots {
+    50% {
+      transform: translateX(-31px);
+    }
+  }
+  @-webkit-keyframes dots {
+    50% {
+      transform: translateX(-31px);
+    }
+  }
+  @-o-keyframes dots {
+    50% {
+      transform: translateX(-31px);
+    }
+  }
+  @keyframes dots {
+    50% {
+      transform: translateX(-31px);
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    #map {
+      width: 100vw;
+      height: 14vh;
+    }
+  }
+  
