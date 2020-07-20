@@ -11,7 +11,7 @@ svg rect {
   fill: #f1f1ee;   /* country colour */
   stroke: #5172973d; /* country border colour */
   stroke-width: 1.2; /* country border width */
-}
+} 
 .country-on{
   stroke: #000;/* #77cfbc;   highlight colour for selected country */
   stroke-width: .4;

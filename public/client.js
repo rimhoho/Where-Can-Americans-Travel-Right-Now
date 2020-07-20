@@ -7,7 +7,7 @@ if (host.includes("heroku")) {
 } else {
     var base_url = "http://localhost:5000";
 };
-
+ 
 // CALLING ROADING ANIMATION
 (function() {
   let bubble = d3.select("#map").append('div').attr('class', 'bubble loading');
