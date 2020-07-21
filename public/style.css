@@ -1,13 +1,13 @@
 /* map */
 #map {
   width: 100vw;
-  height: 80vh;
+  height: 78vh;
   background-color: #98b2cf;;
 }
 svg rect {
   fill: #98b2cf;   /* map background colour */
 }
-.country{
+.zoomFlag{
   fill: #f1f1ee;   /* country colour */
   stroke: #5172973d; /* country border colour */
   stroke-width: 1.2; /* country border width */
@@ -16,16 +16,14 @@ svg rect {
   stroke: #000;/* #77cfbc;   highlight colour for selected country */
   stroke-width: .4;
 }
-.countryLabel{
+.countryLabels{
   display: none;   /* hide all country labels by default */
 }
-.countryName{
-  fill: #FFFAFF;   /* country label text colour */
+.canGo {
+  fill: none;
+  stroke: #333;
+  stroke-dasharray: 2,1;
 }
-.countryLabelBg{
-  fill: #30BCED;   /* country label background colour */
-}
-
 /* others */
 .title {font-size: 1.1rem; line-height: 2rem;}
 .bubble {

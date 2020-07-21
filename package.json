@@ -1,7 +1,7 @@
 {
-  "name": "node-js-getting-started",
+  "name": "where-to-travel-now",
   "version": "0.3.0",
-  "description": "A sample Node.js app using Express 4",
+  "description": "A sample Node.js app using Express 4, D3 map, Selenium",
   "engines": {
     "node": "12.x"
   },
@@ -14,7 +14,7 @@
     "axios": "^0.19.2",
     "ejs": "^2.5.6",
     "express": "^4.17.1",
-    "selenium-webdriver": "^4.0.0-alpha.7",
+    "jssoup": "0.0.12",
     "spin.js": "^4.1.0",
     "topojson-client": "^3.1.0"
   },
@@ -24,12 +24,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/heroku/node-js-getting-started"
+    "url": "git+https://github.com/rimhoho/where-to-travel-now"
   },
   "keywords": [
     "node",
     "heroku",
     "express"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/heroku/node-js-getting-started/issues"
+  },
+  "homepage": "https://github.com/heroku/node-js-getting-started#readme",
+  "author": "Hyerim Hwang"
 }

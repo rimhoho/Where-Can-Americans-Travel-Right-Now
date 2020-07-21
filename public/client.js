@@ -1,5 +1,3 @@
-// const { addConsoleHandler } = require("selenium-webdriver/lib/logging");
-
 // Base URL logic: If hosted on Heroku, format differently
 var host = window.location.hostname;
 if (host.includes("heroku")) {
@@ -37,103 +35,75 @@ const initCountry = function(svg, w, h, map) {
   // DEFINE FUNCTIONS/OBJECTS
   let projection = d3.geoMercator()
                       .center([0, 14])
-                      .scale([w / (2 * Math.PI)])
+                      .scale([w / (2.4 * Math.PI)])
                       .translate([w / 2, h / 2])
                       .precision(0.1),
       geoPath = d3.geoPath().projection(projection);
   //Bind data and create one path per GeoJSON feature
-  countriesG = svg.append("g").attr("id", "countries");
+  countriesG = svg.append("g").attr("id", "countryGroup");
   // add a background rectangle
   countriesG.append("rect")
             .attr("x", 0)
             .attr("y", 0)
             .attr("width", w)
             .attr("height", h)
-            .classed('init-land', true);
+            .classed('country-rect', true);
   // draw a path for each feature/country
-  countries = countriesG.selectAll("path")
-                        .data(topojson.feature(map, map.objects["countries"]).features)
-                        .enter()
-                        .append("path")
-                        .attr("d", geoPath)
-                        .attr("id", function(d, i) {
-                          return "country"+ d.properties.name;
-                        })
-                        .attr("class", "country")
-                        // add an onclick action to zoom into clicked country
-                        .on("click", function(d, i) {
-                          var zoom_active = d3.select(this).classed("zoomIn") ? false : true;
-                          if (zoom_active) {
-                            d3.selectAll(".country").classed("country-on", false);
-                            d3.select(this).classed("country-on", true);
-                            d3.select(this).classed("zoomIn", true);
-                            d3.select(this).style("display", "block");
-                            boxZoom(geoPath.bounds(d), geoPath.centroid(d), 20);
-                            zoom_active = false;
-                            console.log('active', zoom_active)
-                          } else {
-                            d3.selectAll(".country").classed("country-on", false);
-                            d3.select(this).classed("zoomIn", false);
-        
-                            initZoom(svg, w, h);
-                            zoom_active = true;
-                            console.log('inactive', zoom_active)
-                          }
-                        });
+  countriesG.selectAll("path")
+            .data(topojson.feature(map, map.objects["countries"]).features)
+            .enter()
+            .append("path")
+            .attr("d", geoPath)
+            .attr("id", function(d, i) {
+              return d.id;
+            })
+            .attr("class", "zoomFlag")
+            // add an onclick action to zoom into clicked country
+            .on("click", function(d, i) {
+              var zoom_active = d3.select(this).classed("zoomIn") ? false : true;
+              if (zoom_active) {
+                d3.selectAll(".zoomFlag").classed("country-on", false);
+                d3.select(this).classed("country-on", true);
+                d3.select(this).classed("zoomIn", true);
+                d3.select(this).style("display", "block");
+                boxZoom(geoPath.bounds(d), geoPath.centroid(d), 20);
+                zoom_active = false;
+                console.log('active', zoom_active)
+              } else {
+                d3.selectAll(".zoomFlag").classed("country-on", false);
+                d3.select(this).classed("zoomIn", false);
+
+                initZoom(svg, w, h);
+                zoom_active = true;
+                console.log('inactive', zoom_active)
+              }
+            });
   
   // Add a label group to each feature/country. This will contain the country name and a background rectangle
-  countryLabels = countriesG.selectAll("g")
-                            .data(topojson.feature(map, map.objects["countries"]).features)
-                            .enter()
-                            .append("g")
-                            .attr("class", "countryLabel")
-                            .attr("id", function(d) {
-                              return "label" + d.properties.name;
-                            })
-                            .attr("transform", function(d) {
-                              return ("translate(" + geoPath.centroid(d)[0] + "," + geoPath.centroid(d)[1] + ")");
-                            })
-                            // add an onlcick action to zoom into clicked country
-                            .on("click", function(d, i) {
-                                var active = zoomIn.active ? false : true;
-                                if (active) {
-                                  d3.selectAll(".country").classed("country-on", false);
-                                  d3.select(this).style("display", "block");
-                                  d3.select("#country" + d.properties.name).classed("country-on", true);
-                                  boxZoom(geoPath.bounds(d), geoPath.centroid(d), 20);
-                                  zoomIn.active = true;
-                                } else {
-                                  d3.selectAll(".country").classed("country-on", false);
-                                  d3.select(this).style("display", "none");
-                                  initZoom(svg, w, h);
-                                  zoomIn.active = false;
-                                }
-                            });
+  countryLabels = svg.append("g")
+                     .attr("id", "countryLabels");
   // add the text to the label group showing country name
-  countryLabels.append("text")
-              .attr("class", "countryName")
-              .style("text-anchor", "middle")
-              .attr("dx", 0)
-              .attr("dy", 0)
-              .text(function(d) {
-                return d.properties.name;
-              })
-              .call(function (selection) {
-                  selection.each(function(d) {d.bbox = this.getBBox()});
-              });
+  // countryLabels.selectAll(".countryName")
+  //              .data(topojson.feature(map, map.objects["countries"]).features)
+  //              .enter()
+  //              .append("text")
+  //              .attr("class", "countryName")
+  //              .text(function(d) {
+  //                return d.properties.name;
+  //              })
+  //              .attr("transform", function(d) {
+  //               return "translate(" + (geoPath.centroid(d)[0] -20) + "," + (geoPath.centroid(d)[1]+20) + ")";
+  //             })
   // add a background rectangle the same size as the text
-  countryLabels.insert("rect", "text")
-              .attr("class", "countryLabelBg")
-              .attr("transform", function(d) {
-                //  console.log('d: ', d.bbox.x, d.bbox.y);
-                return "translate(" + (d.bbox.x - 2) + "," + d.bbox.y + ")";
-              })
-              .attr("width", function(d) {
-                return d.bbox.width + 4;
-              })
-              .attr("height", function(d) {
-                return d.bbox.height;
-              });
+  countryLabels.selectAll(".canGo")
+               .data(topojson.feature(map, map.objects["countries"]).features)
+               .enter()
+              //  .append("rect")
+              //  .attr("class", "canGo")
+              //  .attr('x', d => geoPath.bounds(d)[0][0])
+              //  .attr('y', d => geoPath.bounds(d)[0][1])
+              //  .attr('width', d => geoPath.bounds(d)[1][0] - geoPath.bounds(d)[0][0])
+              //  .attr('height', d => geoPath.bounds(d)[1][1] - geoPath.bounds(d)[0][1]);
 }
 const initZoom = function(svg, w, h){
   minZoom = 1;
@@ -194,7 +164,8 @@ const boxZoom = function(box, centroid, paddingPerc) {
 Promise.all([
 
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
-    // d3.json(base_url+"/api")
+    // d3.json(base_url+"/api"),
+    d3.json(base_url+"/cango")
 
 ]).then(([map, data]) => {
 
