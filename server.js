@@ -1,9 +1,11 @@
 const express = require('express')
-const path = require('path')
-const PORT = process.env.PORT || 5000
-const app = express()
-const https = require('https')
-const jssoup = require('jssoup').default;
+const path = require('path');
+const PORT = process.env.PORT || 5000;
+const app = express();
+const https = require('https');
+const got = require('got');
+const jsdom = require("jsdom");
+const { JSDOM } = jsdom;
 
 app
   .use(express.static(path.join(__dirname, 'public')))
@@ -29,36 +31,33 @@ app
         return response.send(content);
       });
     }).on('error', (e) => {
-      console.error(e);
+      console.error('/api error: ', e);
     });
   });
 
   app.get('/cango', function(request, response) {
-    https.get("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/", (res) => {
-      console.log('/cango statusCode:', res.statusCode);
-      // console.log('headers:', res.headers);
-      let find_update = document.querySelector('.post-last-modified-td').innerHTML;
-      let find_countryList = document.querySelectorAll('.elementor-widget-wrap'); // 6 ~ 38 : Country List 
-      console.log('Updated', find_update);
-      
-      find_countryList.map((country, i) => {
-                        if (i > 5 && i < 39) {
-                          console.log('* * ', country.innerHTML);
-                          return country.innerHTML
-                        }
-                      })   
-                      // .filter(txt => txt.includes('SomeText')) 
-                      // .forEach(txt => console.log(txt)); 
-      let content = '';
-      res.on('data', (d) => {
-        content = content + d
+      got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
+        let content = {}, list = {};
+        const dom = new JSDOM(res.body);
+        content['updted_date'] = dom.window.document.querySelector('.post-last-modified-td').textContent;
+
+        const list_title = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.innerHTML;
+        content['title'] = list_title;
+
+        const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
+        countryList.forEach((country, i) => {
+          let name_date = country.innerHTML.split(' – ');
+          list[name_date[0]] = name_date[1];
+          content['list'] = list;
+        });
+        // console.log(content);
+        return response.json(content);
       });
-      res.on('end', () => {
-        console.log('cango received')
-        console.log(typeof content)      
-        return response.send(content);
-      });
-    }).on('error', (e) => {
-      console.error(e);
-    });
   });
+
+  
+  // .map((country, i) => country.innerHTML)   
+  // .filter(txt => txt.includes('SomeText')) 
+  // .forEach(txt => console.log(txt)); 
+
+  
