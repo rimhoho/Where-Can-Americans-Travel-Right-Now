@@ -164,15 +164,16 @@ const boxZoom = function(box, centroid, paddingPerc) {
 Promise.all([
 
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
-    // d3.json(base_url+"/api"),
+    d3.json(base_url+"/api"),
     d3.json(base_url+"/cango")
 
-]).then(([map, data]) => {
+]).then(([map, api, cango]) => {
 
   d3.selectAll('.loading').remove();
   console.log('map: ', map);
-  console.log('data', data);
+  console.log('cango: ', cango);
   
+  d3.select('.find_update').text(cango['updted_date']);
   initCountry(svg, w, h, map);
   initZoom(svg, w, h);
 
