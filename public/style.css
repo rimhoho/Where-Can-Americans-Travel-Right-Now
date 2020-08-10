@@ -1,34 +1,47 @@
 /* map */
 #map {
   width: 100vw;
-  height: 70vh;
-  background-color: #98b2cf;;
+  height: 78vh;
 }
 svg rect {
-  fill: #98b2cf;   /* map background colour */
+  fill: #D1DBE1;   /* map background colour */
 }
-.zoomFlag{
-  fill: #f1f1ee;   /* country colour */
-  stroke: #5172973d; /* country border colour */
-  stroke-width: 1.2; /* country border width */
+.country_path{
+  stroke: #D1DBE1; /* country border colour */
+  stroke-width: 1; /* country border width */
 } 
-.country-on{
-  stroke: #000;/* #77cfbc;   highlight colour for selected country */
-  stroke-width: .4;
+.hover {
+  cursor: pointer;
 }
-.countryLabels{
-  display: none;   /* hide all country labels by default */
+.tooltip{
+  color: #222;
+  background-color: #fff;
+  padding: 1.4rem 2.2rem;
+  text-shadow: #f5f5f5 0 1px 0;
+  border-radius: .6rem;
+  opacity: .9;
+  position: absolute;
 }
-.canGo {
-  fill: none;
-  stroke: #333;
-  stroke-dasharray: 2,1;
+th, td {padding: 0 1em 0.5ex 0;}
+.text_right { text-align: right; }
+.hidden {
+  display: none;
+}
+.countryName {
+  font-size: 0.8rem;
+  /* font-weight: 700; */
+}
+.tomato {
+  color: #e23f3f;
+}
+.main_color {
+  color: #0e90f9;
 }
 /* others */
 .title {font-size: 1.1rem; line-height: 2rem;}
 .bubble {
     position: absolute;
-    top: 30%;
+    top: 46%;
     left: 50%;
     width: 142px;
     height: 40px;
