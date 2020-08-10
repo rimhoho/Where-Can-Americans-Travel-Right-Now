@@ -5,7 +5,7 @@ if (host.includes("heroku")) {
 } else {
     var base_url = "http://localhost:5000";
 };
- 
+
 // CALLING ROADING ANIMATION
 (function() {
   let bubble = d3.select("#map").append('div').attr('class', 'bubble loading');
@@ -31,14 +31,66 @@ var map = d3.select("#map"),
     maxZoom;
 
 // DEFINE FUNCTION
-const initCountry = function(svg, w, h, map) {
+const initCountry = function(svg, w, h, map, covid_data) {
   // DEFINE FUNCTIONS/OBJECTS
   let projection = d3.geoMercator()
-                      .center([0, 14])
-                      .scale([w / (2.4 * Math.PI)])
-                      .translate([w / 2, h / 2])
+                      .center([0, 30])
+                      .scale([w / (1.8 * Math.PI)])
+                      .translate([w / 1.8, h / 2])
                       .precision(0.1),
-      geoPath = d3.geoPath().projection(projection);
+      geoPath = d3.geoPath().projection(projection),
+      myBubble = d3.scaleLinear().domain([0, d3.max(Object.values(covid_data), d => d.total_cases)]).range([4, 100]),
+      myColor = d3.scaleSequentialSymlog().domain(d3.extent(Object.values(covid_data), d => d.reported_yesterday)).interpolator(d3.interpolateRgbBasis(["#0e90f9","#e23f3f"])),
+      // add a tooltip
+      tooltip = d3.select('#map').append('div').attr('class', 'tooltip'),
+      // create graphs on each third table
+      new_case_trends = function(d) {
+        let new_cases_60days = d.properties.covid_data.data,
+            margin = {top: 4, bottom: 20, left: "ml-2"},
+            width = 50,
+            height = 10,
+            viewHeight = 50,
+            viewWidth = 80,
+            parseDate = d3.timeParse("%Y-%m-%d"),
+            formatDate = d3.timeFormat("%b %m, %Y"),
+            maxY = d3.max(new_cases_60days, d => d.index),
+            xScale = d3.scaleTime().range([0, width]).domain(d3.extent(new_cases_60days, d => parseDate(d.date))),
+            yScale = d3.scaleLinear().range([height, 0]).domain([0, maxY]),
+            // Set the area
+            area = d3.area()
+                     .x(function() { return xScale(d.date); })
+                     .y0(function() { return yScale(0); })
+                     .y1(function() { return yScale(d.index); }),
+            outline = d3.line()
+                        .x(function() { return xScale(d.date); })
+                        .y(function() { return yScale(d.index); }),
+            svg = d3.select('.new_cases')
+                    .append("svg")
+                    .attr("class", margin.left)
+                    .attr("viewBox", `0 0 ${width} ${viewHeight}`)
+                    .append("g")
+                    .attr("transform", "translate(0," + margin.top + ")");
+            // LINE
+            svg.append("path")
+                .attr("class", "line")
+                .attr("d", outline(d));
+            // Add Gradient
+            svg.append("path")
+                .attr("class", "area")
+                .attr("fill", "url(#gradient)")
+                .attr("d", area(d));
+                svg.append("linearGradient")
+                .attr("id", "gradient")
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", 0).attr("y1", yScale(0))
+                .attr("x2", 0).attr("y2", yScale(maxY))
+                .selectAll("stop")
+                .data([{offset: "0%",color: color + "20"},{offset: "40%",color: color + "60"},{offset: "100%",color: color}])
+                .enter().append("stop")
+                .attr("offset", function(d) {return d.offset;})
+                .attr("stop-color", function(d) {return d.color;});
+      };
+
   //Bind data and create one path per GeoJSON feature
   countriesG = svg.append("g").attr("id", "countryGroup");
   // add a background rectangle
@@ -49,15 +101,22 @@ const initCountry = function(svg, w, h, map) {
             .attr("height", h)
             .classed('country-rect', true);
   // draw a path for each feature/country
-  countriesG.selectAll("path")
+  countriesG.selectAll(".country_path")
             .data(topojson.feature(map, map.objects["countries"]).features)
             .enter()
             .append("path")
             .attr("d", geoPath)
             .attr("id", function(d, i) {
-              return d.id;
+              return "path_"+ d.properties.name;
             })
-            .attr("class", "zoomFlag")
+            .attr("class", "country_path")
+            .attr('fill', d => {
+              if (d.properties.covid_data != undefined) {
+                return "#ffffff"
+              } else {
+                return "#e9ecef"
+              }
+            })
             // add an onclick action to zoom into clicked country
             .on("click", function(d, i) {
               var zoom_active = d3.select(this).classed("zoomIn") ? false : true;
@@ -79,32 +138,122 @@ const initCountry = function(svg, w, h, map) {
               }
             });
   
-  // Add a label group to each feature/country. This will contain the country name and a background rectangle
-  countryLabels = svg.append("g")
-                     .attr("id", "countryLabels");
+  // Add a label group to each feature/country. This will contain the country name
+  countryLabels = countriesG.selectAll(".countryLabels")
+                            .data(topojson.feature(map, map.objects["countries"]).features)
+                            .enter().append("g")
+                            .attr("class", "countryLabels hover")
+                            .attr("id", d => {
+                              if (d.properties.covid_data == undefined) {
+                                return "none_data"
+                              } else {
+                                return "country_" + d.properties.name;
+                              }
+                            })
+                            .attr("transform", function(d) {
+                              if (d.properties.name == 'Croatia') {
+                               return "translate(" + (geoPath.centroid(d)[0]) + "," + (geoPath.centroid(d)[1] - 10) + ")";
+                              } else if (d.properties.name == 'Albania'){
+                                return "translate(" + (geoPath.centroid(d)[0] + 12) + "," + (geoPath.centroid(d)[1] + 10) + ")";
+                              } else if (d.properties.name == 'United States of America'){
+                               return "translate(" + (geoPath.centroid(d)[0] + 30) + "," + (geoPath.centroid(d)[1] + 30) + ")";
+                              } else {
+                               return "translate(" + (geoPath.centroid(d)[0] + 3) + "," + (geoPath.centroid(d)[1]) + ")";
+                              }
+                            })
+                            .each(() => d3.selectAll("#none_data").remove());
+    
+    countryLabels.on('mouseover', function(d) {
+                    // console.log(d3.event.pageX, d3.event.pageY, d.properties);
+                    tooltip.classed('hidden', false)
+                           .attr('style', 'left:' + (d3.event.pageX - 120) + 'px; top:' + (d3.event.pageY - 140) + 'px')
+                           .html(() => {
+                            let color = d.properties.covid_data.reported_yesterday > 0 ? "tomato" : "main_color";
+                            let compare_with_yesterday = d.properties.covid_data.reported_yesterday > 0 ? "+" + d.properties.covid_data.reported_yesterday.toLocaleString().toString() : d.properties.covid_data.reported_yesterday.toLocaleString()
+                            return `<table>
+                                <thead>
+                                  <tr><th colspan="2" class="text-center pb-2">${d.properties.name}</th></tr>
+                                </thead>
+                                <tbody>
+                                  <tr><td><small>When was open</small></td><td class="text_right">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
+                                  <tr><td><small>Confirmed</small></td><td class="text_right">${d.properties.covid_data.total_cases.toLocaleString()}</td></tr>
+                                  <tr><td><small>Reported yesterday</small></td><td class="text_right ${color}">${compare_with_yesterday}</td></tr>
+                                  <tr><td><small>New cases (last 60 days)</small></td><td class="new_cases"></td></tr>
+                                <tbody>
+                                </table>`
+                           })
+                            .call(new_case_trends(d));
+                  })
+                  .on('mouseout', function() {
+                      tooltip.classed('hidden', true);
+                  });
+
+  // add a circle to the center of country showing amount of total cases
+  countryLabels.append("circle")
+               .attr("class", "circle")
+               .attr('r', function(d) {
+                if (d.properties.covid_data != undefined) {
+                  return myBubble(d.properties.covid_data['total_cases'])
+                }})
+                 .attr('fill', d => {
+                if (d.properties.covid_data != undefined) {
+                  return myColor(d.properties.covid_data['reported_yesterday'])
+                } else {
+                  return "#f1f1ee"
+                }})
+                .attr("transform", d => "translate(-6, -4)");
   // add the text to the label group showing country name
-  // countryLabels.selectAll(".countryName")
-  //              .data(topojson.feature(map, map.objects["countries"]).features)
-  //              .enter()
-  //              .append("text")
-  //              .attr("class", "countryName")
-  //              .text(function(d) {
-  //                return d.properties.name;
-  //              })
-  //              .attr("transform", function(d) {
-  //               return "translate(" + (geoPath.centroid(d)[0] -20) + "," + (geoPath.centroid(d)[1]+20) + ")";
-  //             })
-  // add a background rectangle the same size as the text
-  countryLabels.selectAll(".canGo")
-               .data(topojson.feature(map, map.objects["countries"]).features)
-               .enter()
-              //  .append("rect")
-              //  .attr("class", "canGo")
-              //  .attr('x', d => geoPath.bounds(d)[0][0])
-              //  .attr('y', d => geoPath.bounds(d)[0][1])
-              //  .attr('width', d => geoPath.bounds(d)[1][0] - geoPath.bounds(d)[0][0])
-              //  .attr('height', d => geoPath.bounds(d)[1][1] - geoPath.bounds(d)[0][1]);
+  countryLabels.append("text")
+               .attr("class", "countryName")
+               .text(d => {
+                if (d.properties.covid_data != undefined) {
+                  return d.properties.name
+                }
+               })
+               .attr("transform", function(d) {
+                if (d.properties.name == 'Croatia' || d.properties.name == 'Albania') {
+                 return "translate(-52, 0)";
+                } else if (d.properties.name == 'Jamaica') {
+                  return "translate(-10, 18)";
+                } else if (d.properties.name == 'Serbia') {
+                  return "translate(-48, 0)";
+                } else if (d.properties.name == 'Rwanda') {
+                  return "translate(-54, 0)";
+                } else if (d.properties.name == 'Indonesia') {
+                  return "translate(4, 0)";
+                } else if (d.properties.name == 'Macedonia') {
+                  return "translate(-74, -2)";
+                } else if (d.properties.name == 'Haiti') {
+                  return "translate(-10, 12)";
+                }
+               });
+  // add the flag to the label group showing the signal of the average active new cases curve by its color
+  countryLabels.append("g")
+               .attr("class", "svg_flag")
+               .attr("id", function(d, i) {
+                return "flag_"+ d.properties.name;
+               })
+               .attr("transform", d => "translate(-6, -26)")
+               .html(d => {
+                if (d.properties.covid_data != undefined) {
+                  return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                  style="enable-background:new 0 0 17.9 17.7;" xml:space="preserve">
+                  <style type="text/css">
+                    .st0{fill:#424242;}
+                    .st1{fill:#8C8C8C;}
+                    .st2{fill:#727272;}
+                    .st3{fill:#474849;}
+                    .st4{fill:#A2A2A3;}
+                  </style>
+                  <rect x="4.6" y="9.6" class="st0" width="3.3" height="2"/>
+                  <path class="st1" d="M7.8,12.7h10.1l-3.6-4.9l3.6-4.9H7.8v8.3V12.7z"/>
+                  <path class="st2" d="M4.6,11.5c0,0.6,0.6,1.1,1.3,1.1h1.3h0.7v-2.3h-2C5.2,10.4,4.6,10.9,4.6,11.5z"/>
+                  <path class="st3" d="M0.3,0C0.1,0,0,0.1,0,0.3l0,0v17c0,0.2,0.1,0.3,0.3,0.3s0.3-0.1,0.3-0.3v-17l0,0C0.7,0.1,0.5,0,0.3,0z"/>
+                  <rect x="0.7" y="1.3" class="st4" width="7.2" height="9.1"/>
+                  </svg>`}
+                  });
 }
+
 const initZoom = function(svg, w, h){
   minZoom = 1;
   maxZoom = 3 * minZoom;
@@ -170,11 +319,97 @@ Promise.all([
 ]).then(([map, api, cango]) => {
 
   d3.selectAll('.loading').remove();
-  console.log('map: ', map);
+
+  // convert api, cango data into covid_data
+  let covid_data = {};
+  let abbreviations = Object.keys(api);
+  let replacements = {}
+  abbreviations.map(abb => {
+    for (var country in cango['list']) {
+      let days = 60; // Days you want to subtract
+          date = new Date(),
+          last = new Date(date.getTime() - (days * 24 * 60 * 60 * 1000)),
+          day = last.getDate().toString().length == 1 ? "0" + last.getDate() : last.getDate(),
+          month = (last.getMonth() + 1).toString().length == 1 ? "0" + (last.getMonth() + 1) : last.getMonth() + 1,
+          year = last.getFullYear();
+
+      if (country == 'North Macedonia' || country == 'Bali (Indonesia)') {
+        let re = /(\w+)\s\({0,}(\w+)\){0,}/;
+        replacements[country] = country.replace(re, '$2');
+        country = country.replace(re, '$2');
+      } else if (country == 'Dubai (UAE)') {
+        replacements[country] = 'United Arab Emirates';
+        country = 'United Arab Emirates'
+      }
+
+      if (country == api[abb]['location']) {
+        var infos = {}, arr_60days = [], count = 0;
+        infos['total_cases'] = api[abb]['data'][(api[abb]['data'].length)-1]['total_cases'];
+        infos['reported_yesterday'] = api[abb]['data'][(api[abb]['data'].length)-1]['new_cases'] - api[abb]['data'][(api[abb]['data'].length)-2]['new_cases'];
+        infos['population_density'] = api[abb]['population_density'];
+        let replacedItems = Object.keys(cango['list']).map((key) => {
+          const newKey = replacements[key] || key;
+          return { [newKey] : cango['list'][key] };
+        });
+        const new_cango = replacedItems.reduce((a, b) => Object.assign({}, a, b));
+        infos['availabile_date_for_trip'] = new_cango[country];
+        api[abb]['data'].forEach(item => {
+          if (item['date'] == year + '-' + month + '-' + day) {
+            arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
+            count = count + 1;
+          } else if (count > 0) {
+            arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
+            count = count + 1;
+          }
+        })
+        infos['data'] = arr_60days
+        covid_data[api[abb]['location']] = infos;
+      } else {
+        var infos = {}, arr_60days = [], count = 0;
+        infos['total_cases'] = api['USA']['data'][(api['USA']['data'].length)-1]['total_cases'];
+        infos['reported_yesterday'] = api['USA']['data'][(api['USA']['data'].length)-2]['new_cases'];
+        infos['population_density'] = api['USA']['population_density'];
+        infos['availabile_date_for_trip'] = 'Some need to quarantine';
+        api['USA']['data'].forEach(item => {
+          if (item['date'] == year + '-' + month + '-' + day) {
+            arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
+            count = count + 1;
+          } else if (count > 0) {
+            arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
+            count = count + 1;
+          }
+        })
+        infos['data'] = arr_60days
+        covid_data['United States of America'] = infos;
+      }
+    }
+  })
+
+  // convert covid_data into map == Primary dataset!!
+  map['objects']['countries']['geometries'].map(geometries => {
+    for (const key in geometries) {
+      // console.log(geometries[key]['name'])
+      for (var d in covid_data) {
+        if (d == 'Dominican Republic') {
+          var old_name = d;
+          d = 'Dominican Rep.';
+        }
+        if(key == 'properties' && d == geometries[key]['name']) {
+          if (d == 'Dominican Rep.') {
+            geometries[key]['covid_data'] = covid_data[old_name]
+          } else {
+            geometries[key]['covid_data'] = covid_data[d]
+          }
+        }
+      }
+    }
+  })
   console.log('cango: ', cango);
-  
-  d3.select('.find_update').text(cango['updted_date']);
-  initCountry(svg, w, h, map);
+  console.log('map: ', map);
+  console.log('covid_data: ', covid_data)
+
+  d3.select('.find_update').text(cango['updted_date']).attr('class', 'main_color');
+  initCountry(svg, w, h, map, covid_data);
   initZoom(svg, w, h);
 
   // ON WINDOW RESIZE
@@ -187,79 +422,11 @@ Promise.all([
         .call(zoom);
       
       console.log(w, '|', h);
-      d3.selectAll('#countries').remove();
-      initCountry(svg, w, h, map);
+      d3.selectAll('#countryGroup').remove();
+      initCountry(svg, w, h, map, covid_data);
       initZoom(svg, w, h);
   });
 
 }).catch(function(err) {
   if (err) return console.warn(err);
 });
-
-  
-// countries = topojson.feature(map, map.objects["countries"]).features,
-//       // mesh = topojson.mesh(map, map.objects["countries"], (a, b)=> a != b),
-//       geoPath = d3.geoPath().projection(projection);
-  
-//   svg.selectAll(".country")
-//      .data(countries)
-//      .enter()
-//      .attr("class", "country")
-//      .attr("d", geoPath);
-
-
-  // function generateTableHead(table, data) {
-//   let thead = table.createTHead();
-//   let row = thead.insertRow();
-//   for (let key of data) {
-//     let th = document.createElement("th");
-//     let text = document.createTextNode(key);
-//     th.appendChild(text);
-//     row.appendChild(th);
-//   }
-// }
-
-// function generateTable(table, data) {
-//   for (let element of data) {
-//     let row = table.insertRow();
-//     for (key in element) {
-//       let cell = row.insertCell();
-//       let text = document.createTextNode(element[key]);
-//       cell.appendChild(text);
-//     }
-//   }
-// }
-
-// let width = '100%';
-// let height = 520;
-// let projection = d3.geoMercator()
-//     .center([-76.6180827, 39.323953])
-//     .scale([140000])
-//     .translate([270, 165]);
-// let geoGenerator = d3.geoPath().projection(projection);
-// let svg = d3.select("#map").append('svg')
-//     .style("width", width)
-//     .style("height", height);
-
-// const apiData = fetch(base_url_+'/api',{
-//   method : 'GET',
-//   headers: {
-//     'Accept' : 'application/JSON, text/plain, */*',
-//     'Content-type' : 'application/json'
-// }
-// })
-// .then(res => res.json())
-// .then(data => {
-// console.log('* ', data);
-// // new_data = Object.assign({'#': [...Array(data[key]['data'].length).keys()]}, data);
-// // console.log('$', new_data);
-// for (const key in data) {
-//   // data[key]['location'], data[key]['median_age'], data[key]['population_density'], data[key]['cvd_death_rate'], data[key]['gdp_per_capita'], data[key]['life_expectancy'], data[key]['data']>['date']['new_cases'], ['new_cases_per_million'], ['new_deaths'], ['new_deaths_per_million'], ['stringency_index'], ['total_cases'], ['total_cases_per_million'], ['total_deaths'], ['total_deaths_per_million']
-  
-//   // let table = document.querySelector("table");
-//   // let data = Object.keys(mountains[0]);
-//   // generateTableHead(table, data[key]['location']);
-//   // generateTable(table, data);
-// } 
-// })
-// .catch(err => console.log("err on getting API Data: ", err));
