@@ -1,6 +1,6 @@
 const express = require('express')
 const path = require('path');
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 const https = require('https');
 const got = require('got');
@@ -24,10 +24,10 @@ app
       let content = '';
       res.on('data', (d) => {
         content = content + d
+        // d.filter(txt => txt.include() )
       });
       res.on('end', () => {
         console.log('api received')
-        console.log(typeof content)      
         return response.send(content);
       });
     }).on('error', (e) => {
@@ -46,18 +46,22 @@ app
 
         const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
         countryList.forEach((country, i) => {
-          let name_date = country.innerHTML.split(' – ');
-          list[name_date[0]] = name_date[1];
+          let name, date;
+          const calendar = [' January', ' February', ' March', ' April', ' May', ' June', ' July', ' August', ' September', ' October', ' November', ' December'];
+          if (country.innerHTML.includes(' – ')) {
+            name = country.innerHTML.split(' – ')[0];
+            date = country.innerHTML.split(' – ')[1]
+          } else {
+            calendar.forEach(d => {
+              if (country.innerHTML.includes(d)) {
+                name = country.innerHTML.split(d)[0];
+                date = d + country.innerHTML.split(d)[1];
+              }
+            });
+          }
+          list[name] = date;
           content['list'] = list;
         });
-        // console.log(content);
         return response.json(content);
       });
   });
-
-  
-  // .map((country, i) => country.innerHTML)   
-  // .filter(txt => txt.includes('SomeText')) 
-  // .forEach(txt => console.log(txt)); 
-
-  
