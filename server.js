@@ -20,7 +20,6 @@ app
     https.get("https://covid.ourworldindata.org/data/owid-covid-data.json", (res) => {
       console.log('/api statusCode:', res.statusCode);
       // console.log('headers:', res.headers);
-  
       let content = '';
       res.on('data', (d) => {
         content = content + d
