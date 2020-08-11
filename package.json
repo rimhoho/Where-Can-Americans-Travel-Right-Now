@@ -5,10 +5,9 @@
   "engines": {
     "node": "12.x"
   },
-  "main": "index.js",
+  "main": "sever.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node test.js"
+    "start": "node sever.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
