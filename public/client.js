@@ -3,7 +3,7 @@ var host = window.location.hostname;
 if (host.includes("heroku")) {
     var base_url = "https://" + host;
 } else {
-    var base_url = "http://localhost:5000";
+    var base_url = "http://localhost:3000";
 };
 
 // CALLING ROADING ANIMATION
