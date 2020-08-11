@@ -69,7 +69,8 @@ const initCountry = function(svg, w, h, map, covid_data) {
                     .attr("class", margin.left)
                     .attr("viewBox", `0 0 ${width} ${viewHeight}`)
                     .append("g")
-                    .attr("transform", "translate(0," + margin.top + ")");
+                    .attr("transform", "translate(0," + margin.top + ")")
+            color = d.properties.covid_data.reported_yesterday > 0 ? "tomato" : "main_color";
             // LINE
             svg.append("path")
                 .attr("class", "line")
