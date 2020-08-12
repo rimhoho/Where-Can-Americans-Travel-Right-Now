@@ -39,10 +39,8 @@ app
         let content = {}, list = {};
         const dom = new JSDOM(res.body);
         content['updted_date'] = dom.window.document.querySelector('.post-last-modified-td').textContent;
-
         const list_title = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.innerHTML;
         content['title'] = list_title;
-
         const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
         countryList.forEach((country, i) => {
           let name, date;
