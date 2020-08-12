@@ -138,9 +138,9 @@ const initCountry = function(svg, w, h, map, covid_data) {
                            })
                            .each(() => {
                                 let new_cases_60days = d.properties.covid_data.data,
-                                    margin = {top: 2, right: 3, bottom: 3, left: 4},
-                                    width = 80,
-                                    height = 30,
+                                    margin = {top: 2, right: 3, bottom: 3, left: 6},
+                                    width = 90,
+                                    height = 20,
                                     viewHeight = 50,
                                     viewWidth = 80,
                                     parseDate = d3.timeParse("%Y-%m-%d"),
