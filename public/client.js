@@ -356,7 +356,7 @@ Promise.all([
         infos['total_cases'] = api['USA']['data'][(api['USA']['data'].length)-1]['total_cases'];
         infos['reported_yesterday'] = api['USA']['data'][(api['USA']['data'].length)-2]['new_cases'];
         infos['population_density'] = api['USA']['population_density'];
-        infos['availabile_date_for_trip'] = 'State By State';
+        infos['availabile_date_for_trip'] = 'States differ';
         api['USA']['data'].forEach(item => {
           if (item['date'] == year + '-' + month + '-' + day) {
             arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
