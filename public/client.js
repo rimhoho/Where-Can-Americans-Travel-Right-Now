@@ -42,55 +42,7 @@ const initCountry = function(svg, w, h, map, covid_data) {
       myBubble = d3.scaleLinear().domain([0, d3.max(Object.values(covid_data), d => d.total_cases)]).range([4, 100]),
       myColor = d3.scaleSequentialSymlog().domain(d3.extent(Object.values(covid_data), d => d.reported_yesterday)).interpolator(d3.interpolateRgbBasis(["#0e90f9","#e23f3f"])),
       // add a tooltip
-      tooltip = d3.select('#map').append('div').attr('class', 'tooltip'),
-      // create graphs on each third table
-      new_case_trends = function(d) {
-        let new_cases_60days = d.properties.covid_data.data,
-            margin = {top: 4, bottom: 20, left: "ml-2"},
-            width = 50,
-            height = 10,
-            viewHeight = 50,
-            viewWidth = 80,
-            parseDate = d3.timeParse("%Y-%m-%d"),
-            formatDate = d3.timeFormat("%b %m, %Y"),
-            maxY = d3.max(new_cases_60days, d => d.index),
-            xScale = d3.scaleTime().range([0, width]).domain(d3.extent(new_cases_60days, d => parseDate(d.date))),
-            yScale = d3.scaleLinear().range([height, 0]).domain([0, maxY]),
-            // Set the area
-            area = d3.area()
-                     .x(function() { return xScale(d.date); })
-                     .y0(function() { return yScale(0); })
-                     .y1(function() { return yScale(d.index); }),
-            outline = d3.line()
-                        .x(function() { return xScale(d.date); })
-                        .y(function() { return yScale(d.index); }),
-            svg = d3.select('.new_cases')
-                    .append("svg")
-                    .attr("class", margin.left)
-                    .attr("viewBox", `0 0 ${width} ${viewHeight}`)
-                    .append("g")
-                    .attr("transform", "translate(0," + margin.top + ")")
-            color = d.properties.covid_data.reported_yesterday > 0 ? "tomato" : "main_color";
-            // LINE
-            svg.append("path")
-                .attr("class", "line")
-                .attr("d", outline(d));
-            // Add Gradient
-            svg.append("path")
-                .attr("class", "area")
-                .attr("fill", "url(#gradient)")
-                .attr("d", area(d));
-                svg.append("linearGradient")
-                .attr("id", "gradient")
-                .attr("gradientUnits", "userSpaceOnUse")
-                .attr("x1", 0).attr("y1", yScale(0))
-                .attr("x2", 0).attr("y2", yScale(maxY))
-                .selectAll("stop")
-                .data([{offset: "0%",color: color + "20"},{offset: "40%",color: color + "60"},{offset: "100%",color: color}])
-                .enter().append("stop")
-                .attr("offset", function(d) {return d.offset;})
-                .attr("stop-color", function(d) {return d.color;});
-      };
+      tooltip = d3.select('#map').append('div').attr('class', 'tooltip');
 
   //Bind data and create one path per GeoJSON feature
   countriesG = svg.append("g").attr("id", "countryGroup");
@@ -167,7 +119,7 @@ const initCountry = function(svg, w, h, map, covid_data) {
     countryLabels.on('mouseover', function(d) {
                     // console.log(d3.event.pageX, d3.event.pageY, d.properties);
                     tooltip.classed('hidden', false)
-                           .attr('style', 'left:' + (d3.event.pageX - 120) + 'px; top:' + (d3.event.pageY - 140) + 'px')
+                           .attr('style', 'left:' + (d3.event.pageX - 130) + 'px; top:' + (d3.event.pageY - 180) + 'px')
                            .html(() => {
                             let color = d.properties.covid_data.reported_yesterday > 0 ? "tomato" : "main_color";
                             let compare_with_yesterday = d.properties.covid_data.reported_yesterday > 0 ? "+" + d.properties.covid_data.reported_yesterday.toLocaleString().toString() : d.properties.covid_data.reported_yesterday.toLocaleString()
@@ -176,14 +128,48 @@ const initCountry = function(svg, w, h, map, covid_data) {
                                   <tr><th colspan="2" class="text-center pb-2">${d.properties.name}</th></tr>
                                 </thead>
                                 <tbody>
-                                  <tr><td><small>When was open</small></td><td class="text_right">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
-                                  <tr><td><small>Confirmed</small></td><td class="text_right">${d.properties.covid_data.total_cases.toLocaleString()}</td></tr>
-                                  <tr><td><small>Reported yesterday</small></td><td class="text_right ${color}">${compare_with_yesterday}</td></tr>
-                                  <tr><td><small>New cases (last 60 days)</small></td><td class="new_cases"></td></tr>
-                                <tbody>
+                                  <tr><td><small>When was open</small></td><td class="text_right bold">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
+                                  <tr><td><small>Confirmed</small></td><td class="text_right bold">${d.properties.covid_data.total_cases.toLocaleString()}</td></tr>
+                                  <tr><td><small>Reported yesterday</small></td><td class="text_right bold ${color}">${compare_with_yesterday}</td></tr>
+                                  <tr><td><small>New cases (last 60 days)</small></td><td class="new_case_trends"></td></tr>
+                                  <tr><td><small>Population Density</small></td><td class="text_right"><small>${d.properties.covid_data.population_density}/km2</small></td></tr>
+                                </tbody>
                                 </table>`
                            })
-                            .call(new_case_trends(d));
+                           .each(() => {
+                                let new_cases_60days = d.properties.covid_data.data,
+                                    margin = {top: 2, right: 3, bottom: 3, left: 4},
+                                    width = 100,
+                                    height = 30,
+                                    viewHeight = 50,
+                                    viewWidth = 80,
+                                    parseDate = d3.timeParse("%Y-%m-%d"),
+                                    formatDate = d3.timeFormat("%b %m, %Y"),
+                                    maxY = d3.max(new_cases_60days, d => d.index),
+                                    xScale = d3.scaleTime().range([0, width]).domain(d3.extent(new_cases_60days, d => parseDate(d.date))),
+                                    yScale = d3.scaleLinear().range([height, 0]).domain([0, maxY]),
+                                    // Set the area
+                                    area = d3.area()
+                                            .x(function(d) { return xScale(parseDate(d.date)); })
+                                            .y0(function() { return yScale(0); })
+                                            .y1(function(d) { return yScale(d.index); }),
+                                    svg = d3.select('.new_case_trends')
+                                              .attr("class", 'new_case_trends svg')
+                                            .append("svg")
+                                              .attr("width", width + margin.left + margin.right)
+                                              .attr("height", height + margin.top + margin.bottom)
+                                            .append("g")
+                                            .attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+                                    fill_color = myColor(d.properties.covid_data.reported_yesterday);
+                                    console.log('color', fill_color, typeof fill_color)
+                                // Add area
+                                svg.append("path")
+                                    .attr("class", "area")
+                                    .attr("fill", fill_color)
+                                    .attr("stroke", fill_color)
+                                    .attr("stroke-width", 1.5)
+                                    .attr("d", area(new_cases_60days));
+                            });
                   })
                   .on('mouseout', function() {
                       tooltip.classed('hidden', true);
@@ -370,7 +356,7 @@ Promise.all([
         infos['total_cases'] = api['USA']['data'][(api['USA']['data'].length)-1]['total_cases'];
         infos['reported_yesterday'] = api['USA']['data'][(api['USA']['data'].length)-2]['new_cases'];
         infos['population_density'] = api['USA']['population_density'];
-        infos['availabile_date_for_trip'] = 'Some need to quarantine';
+        infos['availabile_date_for_trip'] = 'State By State';
         api['USA']['data'].forEach(item => {
           if (item['date'] == year + '-' + month + '-' + day) {
             arr_60days[count] = {'date': item['date'], 'index': item['new_cases']};
@@ -424,6 +410,7 @@ Promise.all([
       
       console.log(w, '|', h);
       d3.selectAll('#countryGroup').remove();
+      d3.selectAll('.tooltip.hidden').remove();
       initCountry(svg, w, h, map, covid_data);
       initZoom(svg, w, h);
   });
