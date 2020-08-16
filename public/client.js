@@ -152,7 +152,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                             .classed('hidden', false)
                             .attr('style', `left: ${d3.event.pageX + 10}px; top: ${d3.event.pageY + 6}px;`)
                             .html(`<h6>New Cases Index</h6><p>Numbers represent an average of increases or decreases in the new cases for last 60 days. 
-                                    A bigger possitive number means rapidly increase and a bigger negative number refers rapidly decrease.</p>`)
+                                    A bigger possitive number means rapidly increases and a bigger negative number refers rapidly decreases.</p>`)
                       })
                       .on('mouseout', function() {
                           d3.select('.legend_info').remove();
