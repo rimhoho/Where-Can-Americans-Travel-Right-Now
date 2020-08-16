@@ -1,7 +1,7 @@
 /* map */
 #map {
   width: 100vw;
-  height: 40vh;
+  height: 44vh;
 }
 .country-rect {
   fill: #D1DBE1;   /* map background colour */
@@ -18,8 +18,8 @@
   background-color: #222;
   padding: 1.2rem 1.8rem;
   line-height: .8rem;
-  border-radius: .6rem;
-  opacity: .9;
+  border-radius: .2rem;
+  opacity: .88;
   position: absolute;
 }
 .legend_info {
@@ -28,7 +28,7 @@
   padding: 1.2rem 0.6rem 0.6rem 1.4rem;
   line-height: .8rem;
   border-radius: .2rem;
-  opacity: .9;
+  opacity: .82;
   font-size: .68rem;
   position: absolute;
   width: 220px;
@@ -49,10 +49,10 @@ th, td {padding: .4rem 0 0;}
   color: #ee8744;
 }
 /* others */
-.title {font-size: 1.1rem; line-height: 2rem;}
+.title {font-size: 1.1rem; line-height: 1rem;}
 .bubble {
     position: absolute;
-    top: 24%;
+    top: 30%;
     left: 50%;
     width: 142px;
     height: 40px;
