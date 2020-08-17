@@ -38,12 +38,11 @@ app
       got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
         let content = {}, list = {};
         const dom = new JSDOM(res.body);
-        if (dom.window.document.querySelector('#post-modified-info').textContent != typeof string) {
+        if (typeof dom.window.document.querySelector('#post-modified-info').textContent == 'string') {
           content['updted_date'] =  dom.window.document.querySelector('#post-modified-info').textContent;
         } else {
-          content['updted_date'] =  'Last Updated of the Complete List on ' + dom.window.document.querySelector('.updated').textContent;
+          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.updated').textContent;
         }
-        console.log('******', content['updted_date'])
         const list_title = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.innerHTML;
         content['title'] = list_title;
         const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
