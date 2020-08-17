@@ -130,12 +130,12 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                           return d;
                         }
                       })
-                      .attr("x", (d, i) => width + ((i * width) / 1.28))
+                      .attr("x", (d, i) => width + ((i * width) / 1.24))
                       .attr("y", cy2)
                       .attr("font-size", ".64rem");
           legendGroup.append('text')
-                      .text('NEW CASES INDEX (last 60 Days)')
-                      .attr("x", width)
+                      .text('NEW CASES PER 1M INDEX')
+                      .attr("x", width + 12)
                       .attr("y", bottom)
                       .attr('fill', '#474849')
                       .attr("font-size", ".66rem")
@@ -150,9 +150,9 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                           d3.select('nav').append('div')
                             .attr('class', 'legend_info')
                             .classed('hidden', false)
-                            .attr('style', `left: ${d3.event.pageX + 10}px; top: ${d3.event.pageY + 6}px;`)
-                            .html(`<h6>New Cases Index</h6><p>Numbers represent an average of increases or decreases in the new cases for last 60 days. 
-                                    A bigger possitive number means rapidly increases and a bigger negative number refers rapidly decreases.</p>`)
+                            .attr('style', `left: ${d3.event.pageX + 14}px; top: ${d3.event.pageY - 6}px;`)
+                            .html(`<h6>New Cases Per 1M Index</h6><p class="mb-2">Numbers represent the increases or decreases in new cases per 1M of COVID-19 for last 60 days.</p> 
+                            <p>A bigger possitive number means new cases is increasing rapidly and a bigger negative number refers new cases is decreasing rapidly.</p>`)
                       })
                       .on('mouseout', function() {
                           d3.select('.legend_info').remove();
@@ -269,7 +269,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
             tooltip.attr('class', 'tooltip');
             fill_color = myColor(d.properties.covid_data['new_cases_index']);
             tooltip.classed('hidden', false)
-                  .attr('style', 'left:' + (d3.event.pageX - 160) + 'px; top:' + (d3.event.pageY - 250) + 'px')
+                  .attr('style', 'left:' + (d3.event.pageX - 120) + 'px; top:' + (d3.event.pageY - 200) + 'px')
                   .html(() => {
                       let compare_with_yesterday = d.properties.covid_data.reported_yesterday > 0 ? "+" + d.properties.covid_data.reported_yesterday.toLocaleString().toString() : d.properties.covid_data.reported_yesterday.toLocaleString()
                       return `<table>
@@ -277,23 +277,19 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                             <tr><th colspan="2" class="text-center pb-2">${d.properties.name}</th></tr>
                           </thead>
                           <tbody>
-                            <tr><td><small>When's open</small></td><td class="text_right bold">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
-                            <tr><td><small>Hospital Beds per 1K</small></td><td class="text_right"><small>${d.properties.covid_data.hospital_beds_per_thousand}</small></td></tr>
-                            <tr><td class="pb-3"><small>Population Density</small></td><td class="text_right pb-3"><small>${d.properties.covid_data.population_density.toLocaleString()}/km2</small></td></tr>
+                            <tr><td class="pb-3"><small>When's open</small></td><td class="text_right bold pb-3">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
                             <tr class="border-top"><td class="pt-2"><small>Confirmed per 1M</small></td><td class="text_right pt-2"><small>${d.properties.covid_data.confirmed_per_million.toLocaleString()}</small></td></tr>
                             <tr><td class="pb-3"><small>Reported Yesterday</small></td><td class="text_right pb-3"><small>${compare_with_yesterday}</small></td></tr>
                             <tr class="border-top"><td><small>New cases per 1M (last 60 days)</small></td><td class="new_case_trends"></td></tr>
-                            <tr><td><small>New cases Index</small></td><td class="text_right" style="color:${fill_color}"><small>${d.properties.covid_data.new_cases_index}</small></td></tr>
+                            <tr><td><small>New cases per 1M Index</small></td><td class="text_right" style="color:${fill_color}"><small>${d.properties.covid_data.new_cases_index}</small></td></tr>
                           </tbody>
                           </table>`
                   })
                   .each(() => {
                       let new_cases_60days = d.properties.covid_data.data,
-                          margin = {top: 8, right: 3, bottom: 3, left: 6},
-                          width = 88,
+                          margin = {top: 5, right: 2, bottom: 3, left: 8},
+                          width = 70,
                           height = 10,
-                          viewHeight = 50,
-                          viewWidth = 80,
                           parseDate = d3.timeParse("%Y-%m-%d"),
                           formatDate = d3.timeFormat("%b %m, %Y"),
                           maxY = d3.max(new_cases_60days, d => d.index),
