@@ -215,14 +215,14 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                     .attr("transform", function(d) {
                       if (d.properties.covid_data != undefined) {
                         if (d.properties.name == 'Croatia' || d.properties.name == 'Albania' || d.properties.name == 'Jamaica') {
-                          return `translate(-${myBubble(d.properties.covid_data['confirmed_per_million']) * 2.7}, ${myBubble(d.properties.covid_data['confirmed_per_million']) * 2.2})`
+                          return `translate(-${myBubble(d.properties.covid_data['confirmed_per_million']) * 4}, ${myBubble(d.properties.covid_data['confirmed_per_million']) * 2.2})`
                         } else if (d.properties.name == 'Montenegro') {
                           return `translate(-${myBubble(d.properties.covid_data['confirmed_per_million']) * 4.6}, 14)`
                         } else {
                           return `translate(${myBubble(d.properties.covid_data['confirmed_per_million']) + 3}, 4)`
                         }
                     }})
-                    .attr("font-size", ".64rem");
+                    .attr("font-size", ".7rem");
         // Add a circle to the center of country showing amount of total cases
         labelGroup.append("circle")
                   .attr("class", "bubbles")
