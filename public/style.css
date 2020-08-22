@@ -1,18 +1,16 @@
-/* map */
-#map {
-  width: 100vw;
-  height: 44vh;
-}
-.country-rect {
-  fill: #D1DBE1;   /* map background colour */
-}
-.country_path{
-  stroke: #D1DBE1; /* country border colour */
-  stroke-width: 1; /* country border width */
-} 
-.hover {
-  cursor: pointer;
-}
+body {font-family: 'Manrope', sans-serif; font-weight: 500;}
+#map {width: 100vw;height: 44vh;}
+.small, small {font-size: 86% !important; font-weight: 500 !important;}
+.back_color {fill: #D1DBE1; background-color: #D1DBE1;}
+.back2_color {background-color:#edeff4;}
+.country_path{stroke: #D1DBE1; /* country border colour */stroke-width: 1; /* country border width */} 
+.hover {cursor: pointer;}
+th, td {padding: .4rem 0 0;}
+.text_right { text-align: right; }
+.bold {font-weight: 800 !important;}
+.hidden {display: none;}
+.bubbles {opacity: .8;}
+tr {line-height: 0.2rem;}
 .tooltip{
   color: #fff;
   background-color: #222;
@@ -33,21 +31,7 @@
   position: absolute;
   width: 220px;
 }
-th, td {padding: .4rem 0 0;}
-.text_right { text-align: right; }
-.bold {font-weight: 900;}
-.hidden {
-  display: none;
-}
-.bubbles {
-  opacity: .8;
-}
-.tomato {
-  color: #ed5a5a;
-}
-.main_color {
-  color: #ee8744;
-}
+
 /* others */
 .title {font-size: 1.1rem; line-height: 1rem;}
 .bubble {

@@ -47,11 +47,11 @@ app
         content['title'] = list_title;
         const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
         countryList.forEach((country, i) => {
-          let name, date;
+          var name, date;
           const calendar = [' January', ' February', ' March', ' April', ' May', ' June', ' July', ' August', ' September', ' October', ' November', ' December'];
           if (country.innerHTML.includes(' – ')) {
             name = country.innerHTML.split(' – ')[0];
-            date = country.innerHTML.split(' – ')[1]
+            date = country.innerHTML.split(' – ')[1];
           } else {
             calendar.forEach(d => {
               if (country.innerHTML.includes(d)) {
@@ -59,6 +59,9 @@ app
                 date = d + country.innerHTML.split(d)[1];
               }
             });
+          }
+          if (date.includes('&')) {
+            date = date.replace('&nbsp;', '')
           }
           list[name] = date;
           content['list'] = list;

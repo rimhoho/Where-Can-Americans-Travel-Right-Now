@@ -33,7 +33,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                           .precision(0.1),
           geoPath = d3.geoPath().projection(projection),
           extent_new_cases = d3.extent(Object.values(map_w_covid), d => d['new_cases_index']),
-          extent_total_cases = d3.extent(Object.values(map_w_covid), d => d.confirmed_per_million),
+          extent_total_cases = d3.extent(Object.values(map_w_covid), d => d.total_cases_per_million),
           myBubble = d3.scaleLinear().domain(extent_total_cases).range([minSize, maxSize]),
           myColor = d3.scaleSequentialSymlog().domain(extent_new_cases)
                                               .interpolator(d3.interpolateRgbBasis(["#efda1c", "#e04747"])),
@@ -94,8 +94,8 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                       .style("overflow", "visible")
                       .style("display", "block");
           legendGroup.append('text')
-                      .text('CONFIRMED PER 1M')
-                      .attr("x", height)
+                      .text('CONFIRMED CASES PER 1M')
+                      .attr("x", height - 10)
                       .attr("y", bottom)
                       .attr('fill', '#474849')
                       .attr("font-size", ".66rem")
@@ -130,12 +130,12 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                           return d;
                         }
                       })
-                      .attr("x", (d, i) => width + ((i * width) / 1.24))
+                      .attr("x", (d, i) => width + ((i * width) / 1.3))
                       .attr("y", cy2)
                       .attr("font-size", ".64rem");
           legendGroup.append('text')
-                      .text('NEW CASES PER 1M INDEX')
-                      .attr("x", width + 12)
+                      .text('NEW CASES VARIATION INDEX')
+                      .attr("x", width + 6)
                       .attr("y", bottom)
                       .attr('fill', '#474849')
                       .attr("font-size", ".66rem")
@@ -151,7 +151,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                             .attr('class', 'legend_info')
                             .classed('hidden', false)
                             .attr('style', `left: ${d3.event.pageX + 14}px; top: ${d3.event.pageY - 6}px;`)
-                            .html(`<h6>New Cases Per 1M Index</h6><p class="mb-2">Numbers represent the increases or decreases in new cases per 1M of COVID-19 for last 60 days.</p> 
+                            .html(`<h6>New Cases variations index</h6><p class="mb-2">Numbers represent the increases or decreases in new cases per 1M of COVID-19 for last 60 days.</p> 
                             <p>A bigger possitive number means new cases is increasing rapidly and a bigger negative number refers new cases is decreasing rapidly.</p>`)
                       })
                       .on('mouseout', function() {
@@ -166,7 +166,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                   .attr("y", 0)
                   .attr("width", w)
                   .attr("height", h)
-                  .classed('country-rect', true);
+                  .classed('back_color', true);
 
       // draw a path for each feature/country
       mapGroup.selectAll(".pathGroup")
@@ -215,11 +215,11 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                     .attr("transform", function(d) {
                       if (d.properties.covid_data != undefined) {
                         if (d.properties.name == 'Croatia' || d.properties.name == 'Albania' || d.properties.name == 'Jamaica') {
-                          return `translate(-${myBubble(d.properties.covid_data['confirmed_per_million']) * 4}, ${myBubble(d.properties.covid_data['confirmed_per_million']) * 2.2})`
+                          return `translate(-${myBubble(d.properties.covid_data['total_cases_per_million']) * 4}, ${myBubble(d.properties.covid_data['total_cases_per_million']) * 2.2})`
                         } else if (d.properties.name == 'Montenegro') {
-                          return `translate(-${myBubble(d.properties.covid_data['confirmed_per_million']) * 4.6}, 14)`
+                          return `translate(-${myBubble(d.properties.covid_data['total_cases_per_million']) * 4.6}, 14)`
                         } else {
-                          return `translate(${myBubble(d.properties.covid_data['confirmed_per_million']) + 3}, 4)`
+                          return `translate(${myBubble(d.properties.covid_data['total_cases_per_million']) + 3}, 4)`
                         }
                     }})
                     .attr("font-size", ".7rem");
@@ -228,7 +228,7 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                   .attr("class", "bubbles")
                   .attr('r', function(d) {
                     if (d.properties.covid_data != undefined) {
-                      return myBubble(d.properties.covid_data['confirmed_per_million'])
+                      return myBubble(d.properties.covid_data['total_cases_per_million'])
                     }})
                   .attr('fill', function(d) {
                     if (d.properties.covid_data != undefined) {
@@ -277,11 +277,12 @@ const initCountry = function(svg, w, h, map, map_w_covid) {
                             <tr><th colspan="2" class="text-center pb-2">${d.properties.name}</th></tr>
                           </thead>
                           <tbody>
-                            <tr><td class="pb-3"><small>When's open</small></td><td class="text_right bold pb-3">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
-                            <tr class="border-top"><td class="pt-2"><small>Confirmed per 1M</small></td><td class="text_right pt-2"><small>${d.properties.covid_data.confirmed_per_million.toLocaleString()}</small></td></tr>
+                            <tr><td class="pb-3"><small>Border opened on</small></td><td class="text_right bold pb-3">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
+                            <tr class="border-top"><td class="pt-2"><small>Confirmed Cases per 1M</small></td><td class="text_right pt-2"><small>${d.properties.covid_data.total_cases_per_million.toLocaleString()}</small></td></tr>
+                            <tr><td><small>Total Death per 1M</small></td><td class="text_right"><small>${d.properties.covid_data.total_deaths_per_million}</small></td></tr>
                             <tr><td class="pb-3"><small>Reported Yesterday</small></td><td class="text_right pb-3"><small>${compare_with_yesterday}</small></td></tr>
                             <tr class="border-top"><td><small>New cases per 1M (last 60 days)</small></td><td class="new_case_trends"></td></tr>
-                            <tr><td><small>New cases per 1M Index</small></td><td class="text_right" style="color:${fill_color}"><small>${d.properties.covid_data.new_cases_index}</small></td></tr>
+                            <tr><td><small>New cases Variations Index</small></td><td class="text_right" style="color:${fill_color}"><small>${d.properties.covid_data.new_cases_index}</small></td></tr>
                           </tbody>
                           </table>`
                   })
@@ -358,9 +359,9 @@ Promise.all([
 
       if (country == api[abb]['location']) {
         var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
-        infos['confirmed_per_million'] = parseFloat(api[abb]['data'][(api[abb]['data'].length)-1]['total_cases_per_million'].toFixed(2));
+        infos['total_cases_per_million'] = parseFloat(api[abb]['data'][(api[abb]['data'].length)-1]['total_cases_per_million'].toFixed(2));
+        infos['total_deaths_per_million'] = parseFloat(api[abb]['data'][(api[abb]['data'].length)-1]['total_deaths_per_million'].toFixed(2));
         infos['reported_yesterday'] = parseFloat(api[abb]['data'][(api[abb]['data'].length)-1]['new_cases_per_million'] - api[abb]['data'][(api[abb]['data'].length)-2]['new_cases_per_million']).toFixed(2);
-        infos['population_density'] = parseFloat(api[abb]['population_density'].toFixed(2));
         infos['hospital_beds_per_thousand'] = api[abb]['hospital_beds_per_thousand'];
         let replacedItems = Object.keys(cango['list']).map((key) => {
           const newKey = replacements[key] || key;
@@ -385,10 +386,10 @@ Promise.all([
         covid_data[api[abb]['location']] = infos;
       } else {
         var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
-        infos['confirmed_per_million'] = parseFloat(api['USA']['data'][(api['USA']['data'].length)-1]['total_cases_per_million'].toFixed(2));
+        infos['total_cases_per_million'] = parseFloat(api['USA']['data'][(api['USA']['data'].length)-1]['total_cases_per_million'].toFixed(2));
+        infos['total_deaths_per_million'] = parseFloat(api['USA']['data'][(api['USA']['data'].length)-1]['total_deaths_per_million'].toFixed(2));
         infos['reported_yesterday'] = parseFloat(api['USA']['data'][(api['USA']['data'].length)-1]['new_cases_per_million'] - api['USA']['data'][(api['USA']['data'].length)-2]['new_cases_per_million']).toFixed(2);
         infos['availabile_date_for_trip'] = 'States differ';
-        infos['population_density'] = parseFloat(api['USA']['population_density'].toFixed(2));
         infos['hospital_beds_per_thousand'] = api['USA']['hospital_beds_per_thousand'];
         api['USA']['data'].forEach((item, i) => {
           if (item['date'] == year + '-' + month + '-' + day) {
@@ -432,7 +433,31 @@ Promise.all([
   });
   console.log('cango + api + map = map_w_covid: ', map_w_covid)
 
-  d3.select('.find_update').text(cango['updted_date']).attr('class', 'main_color bold');
+  d3.select('.find_update').text(cango['updted_date']);
+
+    tr = d3.select('.table tbody')
+           .selectAll('tr')
+             .data(Object.entries(map_w_covid))
+             .enter()
+           .append('tr')
+             .attr('class', 'small');
+    tr.selectAll("td")
+        .data(d => {
+          return d; })
+        .enter()
+      .append("td")
+        .text((d, i) => {
+          if (i == 1) {
+            return d.availabile_date_for_trip;
+          } else {
+            return d;
+          }
+        });
+
+      // .html(d => {
+      //   console.log('table', d);
+      //   return `<td class="pb-3"><small>${Object.keys(d)}</small></td><td class="text_right bold pb-3">${d.availabile_date_for_trip}</td></tr>`
+      // });
   initCountry(svg, w, h, map, map_w_covid);
 
   // ON WINDOW RESIZE
