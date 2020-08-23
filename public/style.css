@@ -10,7 +10,7 @@ th, td {padding: .4rem 0 0;}
 .bold {font-weight: 800 !important;}
 .hidden {display: none;}
 .bubbles {opacity: .8;}
-tr {line-height: 0.2rem;}
+.table tr {line-height: 0.2rem;}
 .tooltip{
   color: #fff;
   background-color: #222;

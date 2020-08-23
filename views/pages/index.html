@@ -11,9 +11,6 @@
   <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 </head>
 <body>
-  <div class="py-1 text-center text-muted back_color">
-    <small>Use of Masks to Help Slow the Spread of COVID-19<a class="text-muted" href="https://www.cdc.gov/coronavirus/2019-ncov/prevent-getting-sick/diy-cloth-face-coverings.html" target="_blank"> »</a></small>
-  </div>
   <nav class="d-flex shadow pt-4 pb-1 flex-column border-bottom bg-light">
       <h5 class="text-center mb-3 bold"><span><svg class="mb-1 mx-2" width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-geo-alt" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
         <path fill-rule="evenodd" d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
@@ -21,17 +18,26 @@
   </nav>
   <main id="map"></main>
   <div class="text-dark text-center pt-3 sources">
-    <small class="small">Hover Country For More Details About COVID-19.</small><br/>
-    <small class="small">Country Lists are <span class="find_update text-muted bold"></span> @<a class="text-dark" href="https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/" target="_blank">Travel Off Path</a>  with </small>
+    <small>Hover Country For More Details About COVID-19.</small><br/>
+    <small>Country Lists are <span class="find_update text-muted bold"></span> @<a class="text-dark" href="https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/" target="_blank">Travel Off Path</a>  with </small>
     <a class="text-dark small" href="https://ourworldindata.org/coronavirus" target="_blank">OurWorldInData</a><span class="bold small text-muted"> (COVID-19) in real-time</span></small>
   </div>
   <div class="container back2_color">
     <div class="my-5 row">
-      <article class="p-5 article col-md-6">
-        <h2 class="bold text-muted">Are Americans Allowed To Travel Right Now Without Mandatory Quarantines? </h2>
-        <p class="pt-3">Yes. Even though the U.S. government has a level-4 “Avoid All Travel” advisory in place, American’s are still permitted to leave the country as they wish. However, upon returning to the U.S. some travelers may face a 14-day quarantine, based on the state. Some states have no quarantine requirements.</p>
-        <small class="small"><a class="text-dark" href="https://www.traveloffpath.com/countries-open-to-americans-with-a-14-day-quarantine/" target="_blank">Countries open to Americans <span class="small bold">WITH</span> a 14-day Quarantine »</a></small>
-      </article>
+      <div class="column col-md-6 justify-content-between">
+        <article class="px-5 pt-5 pb-1 article col align-self-start">
+          <h2 class="bold text-muted">Are Americans Allowed To Travel Right Now Without Mandatory Quarantines? </h2>
+          <p class="pt-3">Yes. Even though the U.S. government has a level-4 “Avoid All Travel” advisory in place, American’s are still permitted to leave the country as they wish. However, upon returning to the U.S. some travelers may face a 14-day quarantine, based on the state. Some states have no quarantine requirements.</p>
+        </article>
+        <div class="col align-self-end pt-3">
+          <div class="p-4 mx-4 my-3 text-center text-muted back_color">
+            <small>Use of Masks to Help Slow the Spread of COVID-19<a class="text-muted" href="https://www.cdc.gov/coronavirus/2019-ncov/prevent-getting-sick/diy-cloth-face-coverings.html" target="_blank"> »</a></small>
+          </div>
+          <div class="p-4 mx-4 mb-5 text-center text-muted back_color">
+            <small><a class="text-muted" href="https://www.traveloffpath.com/countries-open-to-americans-with-a-14-day-quarantine/" target="_blank">Country List Open To Americans <span class="small bold">WITH</span> A 14-day Quarantine »</a></small>
+          </div>
+        </div>
+      </div>
       <table class="table table-borderless col-md-6 my-5">
         <thead>
           <tr><th colspan="2" class="pb-2 pt-0"><h4 class="bold text-muted">Complete Country List</h4></th></tr>
@@ -39,9 +45,6 @@
         <tbody></tbody>
       </table>
     </div>
-    <!-- <div class="d-flex align-items-end flex-column">
-      <div class="small pr-2 pb-5">TopoJSON doesn't cover all countries, some didn't show on the map.</div>
-    </div> -->
   </div>
   <script type="text/javascript" src="client.js"></script>
 </body>

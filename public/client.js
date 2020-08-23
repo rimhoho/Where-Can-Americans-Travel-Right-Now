@@ -431,33 +431,26 @@ Promise.all([
       }
     }
   });
-  console.log('cango + api + map = map_w_covid: ', map_w_covid)
 
   d3.select('.find_update').text(cango['updted_date']);
 
-    tr = d3.select('.table tbody')
+  let tr = d3.select('.table tbody')
            .selectAll('tr')
              .data(Object.entries(map_w_covid))
              .enter()
            .append('tr')
              .attr('class', 'small');
-    tr.selectAll("td")
-        .data(d => {
-          return d; })
-        .enter()
-      .append("td")
-        .text((d, i) => {
-          if (i == 1) {
-            return d.availabile_date_for_trip;
-          } else {
-            return d;
-          }
-        });
-
-      // .html(d => {
-      //   console.log('table', d);
-      //   return `<td class="pb-3"><small>${Object.keys(d)}</small></td><td class="text_right bold pb-3">${d.availabile_date_for_trip}</td></tr>`
-      // });
+  tr.selectAll("td")
+      .data(d => d)
+      .enter()
+    .append("td")
+      .text((d, i) => {
+        if (i == 1) {
+          return d.availabile_date_for_trip;
+        } else {
+          return d;
+        }
+      });
   initCountry(svg, w, h, map, map_w_covid);
 
   // ON WINDOW RESIZE
