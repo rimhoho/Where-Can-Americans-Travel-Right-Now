@@ -31,4 +31,6 @@ For more information about COVID-19 data or country list that have reopend and d
 ## Wrapping up...
 
 There're already so many precise and informative dashboard of COVID-19 and a little tweak with my interest can be a good enough, positive and interesting project in COVID-19. I'd like to also emphasize that I really appreciate to those people who is working in front of a war in COVID-19.
+ :sparkles:
+
 ![thank_you](https://github.com/rimhoho/where-to-travel-now/blob/master/thank_you.png)
