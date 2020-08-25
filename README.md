@@ -1,7 +1,7 @@
 # Where Can Americans Travel Right Now?
 
 A barebones Node.js app using D3.JS, Bootstrap, RESTful API, JDom (Web scraping),  Node JS, Heroku.
-[Link to Website](https://where-to-travel-now.herokuapp.com/).
+- [Link to Website](https://where-to-travel-now.herokuapp.com/).
 
 ## INTRODUCTION
 
@@ -29,4 +29,4 @@ For more information about COVID-19 data or country list that have reopend and d
 - [Getting Started on Heroku with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
 
 
-![thang_you](https://github.com/rimhoho/where-to-travel-now/thang_you.png)
+![thank_you](https://github.com/rimhoho/where-to-travel-now/thank_you.png)
