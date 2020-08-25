@@ -28,5 +28,7 @@ For more information about COVID-19 data or country list that have reopend and d
 - [COUNTRIES THAT HAVE REOPENED FOR AMERICAN TOURISTS](https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/)
 - [Getting Started on Heroku with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
 
+## Wrapping up...
 
+There're already so many precise and informative dashboard of COVID-19 and a little tweak with my interest can be a good enough, positive and interesting project in COVID-19. I'd like to also emphasize that I really appreciate to those people who is working in front of a war in COVID-19.
 ![thank_you](https://github.com/rimhoho/where-to-travel-now/blob/master/thank_you.png)
