@@ -29,4 +29,4 @@ For more information about COVID-19 data or country list that have reopend and d
 - [Getting Started on Heroku with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
 
 
-![thank_you](https://github.com/rimhoho/where-to-travel-now/thank_you.png)
+![thank_you](https://github.com/rimhoho/where-to-travel-now/blob/master/thank_you.png)
