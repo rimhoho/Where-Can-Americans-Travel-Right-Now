@@ -38,7 +38,8 @@ app
       got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
         let content = {}, list = {};
         const dom = new JSDOM(res.body);
-        if (typeof dom.window.document.querySelector('#post-modified-info').textContent == 'string') {
+        console.log()
+        if (typeof dom.window.document.querySelector('.post-last-modified-td').textContent == 'string') {
           content['updted_date'] =  dom.window.document.querySelector('#post-modified-info').textContent;
         } else {
           content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.updated').textContent;
