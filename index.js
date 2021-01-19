@@ -40,24 +40,25 @@ app
         const dom = new JSDOM(res.body);
         console.log()
         if (typeof dom.window.document.querySelector('.post-last-modified-td').textContent == 'string') {
-          content['updted_date'] =  dom.window.document.querySelector('#post-modified-info').textContent;
+          content['updted_date'] =  dom.window.document.querySelector('.post-last-modified-td').textContent; //#post-modified-info
         } else {
           content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.updated').textContent;
         }
-        const list_title = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.innerHTML;
+        const list_title = dom.window.document.querySelector(".elementor-element-fe352ed").firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.textContent;
         content['title'] = list_title;
-        const countryList = dom.window.document.querySelector(".elementor-element.elementor-element-43a528b.elementor-widget.elementor-widget-text-editor").firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
+        const countryList = dom.window.document.querySelector(".elementor-element-fe352ed").firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
         countryList.forEach((country, i) => {
+          console.log('*', country.textContent)
           var name, date;
           const calendar = [' January', ' February', ' March', ' April', ' May', ' June', ' July', ' August', ' September', ' October', ' November', ' December'];
-          if (country.innerHTML.includes(' – ')) {
-            name = country.innerHTML.split(' – ')[0];
-            date = country.innerHTML.split(' – ')[1];
+          if (country.textContent.includes(' – ')) {
+            name = country.textContent.split(' – ')[0];
+            date = country.textContent.split(' – ')[1];
           } else {
             calendar.forEach(d => {
-              if (country.innerHTML.includes(d)) {
-                name = country.innerHTML.split(d)[0];
-                date = d + country.innerHTML.split(d)[1];
+              if (country.textContent.includes(d)) {
+                name = country.textContent.split(d)[0];
+                date = d + country.textContent.split(d)[1];
               }
             });
           }
