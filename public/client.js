@@ -362,7 +362,7 @@ Promise.all([
         var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
         infos['total_cases_per_million'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['total_cases_per_million']);
         infos['total_deaths_per_million'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['total_deaths_per_million']);
-        infos['reported_yesterday'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['new_cases_per_million'] - api[abb]['data'][(api[abb]['data'].length)-2]['new_cases_per_million']).toFixed(2);
+        infos['reported_yesterday'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['new_cases_per_million'] - api[abb]['data'][(api[abb]['data'].length)-2]['new_cases_per_million']);
         infos['hospital_beds_per_thousand'] = api[abb]['hospital_beds_per_thousand'];
         let replacedItems = Object.keys(cango['list']).map((key) => {
           const newKey = replacements[key] || key;
@@ -389,7 +389,7 @@ Promise.all([
         var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
         infos['total_cases_per_million'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['total_cases_per_million']);
         infos['total_deaths_per_million'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['total_deaths_per_million']);
-        infos['reported_yesterday'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['new_cases_per_million'] - api['USA']['data'][(api['USA']['data'].length)-2]['new_cases_per_million']).toFixed(2);
+        infos['reported_yesterday'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['new_cases_per_million'] - api['USA']['data'][(api['USA']['data'].length)-2]['new_cases_per_million']);
         infos['availabile_date_for_trip'] = 'States differ';
         infos['hospital_beds_per_thousand'] = api['USA']['hospital_beds_per_thousand'];
         api['USA']['data'].forEach((item, i) => {

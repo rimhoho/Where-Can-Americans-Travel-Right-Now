@@ -7,11 +7,15 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "node test.js"
+    "start": "node index.js"
   },
   "dependencies": {
+<<<<<<< HEAD
     "axios": "^0.21.1",
+=======
+    "axios": "^0.19.2",
+    "d3-time-format": "^2.2.3",
+>>>>>>> 1375e1fc9e4612f74f98e83955063464886818e6
     "d3-tip": "^0.9.1",
     "ejs": "^2.5.6",
     "express": "^4.17.1",
