@@ -16,23 +16,23 @@ app
   })
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
-  app.get('/api', function(request, response) {
-    https.get("https://covid.ourworldindata.org/data/owid-covid-data.json", (res) => {
-      console.log('/api statusCode:', res.statusCode);
-      // console.log('headers:', res.headers);
-      let content = '';
-      res.on('data', (d) => {
-        content = content + d
-        // d.filter(txt => txt.include() )
-      });
-      res.on('end', () => {
-        console.log('api received')
-        return response.send(content);
-      });
-    }).on('error', (e) => {
-      console.error('/api error: ', e);
-    });
-  });
+  // app.get('/api', function(request, response) {
+  //   https.get("https://covid.ourworldindata.org/data/owid-covid-data.json", (res) => {
+  //     console.log('/api statusCode:', res.statusCode);
+  //     // console.log('headers:', res.headers);
+  //     let content = '';
+  //     res.on('data', (d) => {
+  //       content = content + d
+  //       // d.filter(txt => txt.include() )
+  //     });
+  //     res.on('end', () => {
+  //       console.log('api received')
+  //       return response.send(content);
+  //     });
+  //   }).on('error', (e) => {
+  //     console.error('/api error: ', e);
+  //   });
+  // });
 
   app.get('/cango', function(request, response) {
       got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
