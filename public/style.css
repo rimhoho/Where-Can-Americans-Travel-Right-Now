@@ -7,7 +7,7 @@ body {font-family: 'Manrope', sans-serif; font-weight: 500;}
 .hover {cursor: pointer;}
 th, td {padding: .4rem 0 0;}
 .text_right { text-align: right; }
-.bold {font-weight: 800 !important;}
+.bold {font-weight: 600 !important;}
 .hidden {display: none;}
 .bubbles {opacity: .8;}
 .table tr {line-height: 0.2rem;}
