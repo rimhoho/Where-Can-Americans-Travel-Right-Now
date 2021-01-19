@@ -3,9 +3,9 @@ var host = window.location.hostname;
 if (host.includes("heroku")) {
     var base_url = "https://" + host;
 } else {
-    var base_url = "http://localhost:5000";
+    var base_url = "http://localhost:3000";
 };
- 
+
 // CALLING ROADING ANIMATION
 (function() {
   let bubble = d3.select("#map").append('div').attr('class', 'bubble loading');
@@ -14,168 +14,445 @@ if (host.includes("heroku")) {
 }());
 
 // DEFINE VARIABLES/OBJECTS
-var map = d3.select("#map"),
-    w = parseInt(d3.select('#map').style('width')),
+var w = parseInt(d3.select('#map').style('width')),
     h = parseInt(d3.select('#map').style('height')),
-    zoom = d3.zoom().on("zoom", function() { 
-              t = d3.event.transform;         // https://github.com/d3/d3-zoom#zoomTransform
-              countriesG.attr("transform","translate(" + [t.x, t.y] + ")scale(" + t.k + ")");
-            }),
     svg = d3.select("#map")
             .append("svg")
             .attr("width", w)
             .attr("height", h)
-            .classed("init-map", true)
-            .call(zoom),
-    minZoom,
-    maxZoom;
+            .classed("init-map", true),
+    minSize = 4, maxSize = 30;
 
 // DEFINE FUNCTION
-const initCountry = function(svg, w, h, map) {
-  // DEFINE FUNCTIONS/OBJECTS
-  let projection = d3.geoMercator()
-                      .center([0, 14])
-                      .scale([w / (2.4 * Math.PI)])
-                      .translate([w / 2, h / 2])
-                      .precision(0.1),
-      geoPath = d3.geoPath().projection(projection);
-  //Bind data and create one path per GeoJSON feature
-  countriesG = svg.append("g").attr("id", "countryGroup");
-  // add a background rectangle
-  countriesG.append("rect")
-            .attr("x", 0)
-            .attr("y", 0)
-            .attr("width", w)
-            .attr("height", h)
-            .classed('country-rect', true);
-  // draw a path for each feature/country
-  countriesG.selectAll("path")
-            .data(topojson.feature(map, map.objects["countries"]).features)
-            .enter()
-            .append("path")
-            .attr("d", geoPath)
-            .attr("id", function(d, i) {
-              return d.id;
+const initCountry = function(svg, w, h, map, map_w_covid) {
+      // DEFINE FUNCTIONS/OBJECTS
+      let projection = d3.geoMercator()
+                          .center([0, maxSize])
+                          .scale([w / (1.3 * Math.PI)])
+                          .translate([w / 1.7, h / 2.2])
+                          .precision(0.1),
+          geoPath = d3.geoPath().projection(projection),
+          extent_new_cases = d3.extent(Object.values(map_w_covid), d => d['new_cases_index']),
+          extent_total_cases = d3.extent(Object.values(map_w_covid), d => d.total_cases_per_million),
+          myBubble = d3.scaleLinear().domain(extent_total_cases).range([minSize, maxSize]),
+          myColor = d3.scaleSequentialSymlog().domain(extent_new_cases)
+                                              .interpolator(d3.interpolateRgbBasis(["#efda1c", "#e04747"])),
+          bubbleLeggend = d3.scaleSqrt().domain(extent_new_cases).range([minSize, maxSize]);
+          tooltip = d3.select('#map').append('div'),
+          response_width = w/4.4 > 323 ? 380 : 323;
+
+      // Add bubble legend - circles, segments, labels
+      let legendGroup = d3.select('nav')
+                          .append("svg")
+                           .attr("id", "legendGroup")
+                           .attr('class', 'mb-2')
+                           .attr("width", response_width)
+                           .attr("height", 94)
+                           .attr("transform", `translate(${(w/2) - response_width/2}, 0) scale(.9)`)
+                           .attr("viewbox", '0 0 100 100'),
+          cx = 46,
+          cy = 34,
+          cy2 = 66,
+          width = 160, 
+          height = 16
+          bottom = 88;
+
+          legendGroup.selectAll('circle')
+                      .data(extent_new_cases.reverse())
+                      .enter()
+                      .append('circle')
+                      .attr('cx', cx)
+                      .attr('cy', function(d){ 
+                        return cy2 - bubbleLeggend(d)})
+                      .attr('r', function(d){ return bubbleLeggend(d) })
+                      .style('fill', 'white')
+                      .style('stroke', '#474849');
+          legendGroup.selectAll('line')
+                      .data(extent_new_cases)
+                      .enter()
+                      .append("line")
+                      .attr('x1', function(d){ return cx + bubbleLeggend(d) } )
+                      .attr('x2', cx + 40)
+                      .attr('y1', function(d){ return cy2 - bubbleLeggend(d) } )
+                      .attr('y2', function(d){ return cy2 - bubbleLeggend(d) } )
+                      .style('stroke', 'black')
+                      .style('stroke-dasharray', ('2,2'));
+          legendGroup.selectAll('.size_segment')
+                      .data(extent_total_cases.reverse())
+                      .enter()
+                      .append("text")
+                      .attr('class','size_segment')
+                      .attr('x', cx + 42)
+                      .attr('y', function(d, i){ return ((i + 1) * maxSize) + 4} )
+                      .text( function(d){ return d } )
+                      .attr("font-size", ".64rem")
+                      .attr('alignment-baseline', 'middle');
+          legendGroup.append('svg')
+                      .attr('class', 'color_scale')
+                      .attr('width', width)
+                      .attr('height', height)
+                      .style("overflow", "visible")
+                      .style("display", "block");
+          legendGroup.append('text')
+                      .text('CONFIRMED CASES PER 1M')
+                      .attr("x", height - 10)
+                      .attr("y", bottom)
+                      .attr('fill', '#474849')
+                      .attr("font-size", ".66rem")
+                      .attr("font-weight", "900");
+          
+         legendGroup.append("linearGradient")
+                      .attr("id", "gradient")
+                      .selectAll("stop")
+                      .data(
+                      [{offset: "0%",color: myColor(d3.min(Object.values(map_w_covid), d => d['new_cases_index']))}, 
+                        {offset: "100%", color: myColor(d3.max(Object.values(map_w_covid), d => d['new_cases_index']))}
+                      ])
+                      .enter()
+                      .append("stop")
+                      .attr("offset", d => d.offset)
+                      .attr("stop-color", d => d.color);
+          legendGroup.append("rect")
+                      .attr("x", width)
+                      .attr("y", 28)
+                      .attr("width", width)
+                      .attr("height", height)
+                      .style("fill", "url(#gradient)")
+                      .style('stroke', '#474849');
+          legendGroup.selectAll('.color_segment')
+                      .data(extent_new_cases.reverse())
+                      .enter()
+                      .append('text')
+                      .text(d => {
+                        if (d > 0) {
+                          return '+' + d;
+                        } else {
+                          return d;
+                        }
+                      })
+                      .attr("x", (d, i) => width + ((i * width) / 1.3))
+                      .attr("y", cy2)
+                      .attr("font-size", ".64rem");
+          legendGroup.append('text')
+                      .text('NEW CASES VARIATION INDEX')
+                      .attr("x", width + 6)
+                      .attr("y", bottom)
+                      .attr('fill', '#474849')
+                      .attr("font-size", ".66rem")
+                      .attr("font-weight", "900")
+                      .attr('class', 'index_infos');
+          legendGroup.append('g')
+                     .attr('transform', `translate(${width * 1.9}, 4)`)
+                     .html(`<svg width="1.2em" height="1.2em" class="bi bi-info-circle-fill" fill="#393e44" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM8 5.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                            </svg>`)
+                     .on('mouseover', function(d) {
+                          d3.select('nav').append('div')
+                            .attr('class', 'legend_info')
+                            .classed('hidden', false)
+                            .attr('style', `left: ${d3.event.pageX + 14}px; top: ${d3.event.pageY - 6}px;`)
+                            .html(`<h6>New Cases variations index</h6><p class="mb-2">Numbers represent the increases or decreases in new cases per 1M of COVID-19 for last 60 days.</p> 
+                            <p>A bigger possitive number means new cases is increasing rapidly and a bigger negative number refers new cases is decreasing rapidly.</p>`)
+                      })
+                      .on('mouseout', function() {
+                          d3.select('.legend_info').remove();
+                      });
+      
+      //Bind data and create one path per GeoJSON feature
+      mapGroup = svg.append("g").attr("id", "mapGroup");
+      // add a background rectangle
+      mapGroup.append("rect")
+                  .attr("x", 0)
+                  .attr("y", 0)
+                  .attr("width", w)
+                  .attr("height", h)
+                  .classed('back_color', true);
+
+      // draw a path for each feature/country
+      mapGroup.selectAll(".pathGroup")
+                  .data(topojson.feature(map, map.objects["countries"]).features)
+                  .enter()
+              .append("path")
+                .attr("d", geoPath)
+                .attr("id", function(d, i) {
+                  return "path_"+ d.properties.name;
+                })
+                .attr("class", "pathGroup")
+                .attr('fill', d => {
+                  if (d.properties.covid_data != undefined) {
+                    return "#ffffff"
+                  } else {
+                    return "#e9ecef"
+                  }
+                })
+                .attr("class", "country_path");
+
+        // Add a label group to each feature/country. This will contain the country name
+        labelG = svg.append("g").attr("id", "labelGroup");
+        labelGroup = labelG.selectAll(".labelGroup")
+                              .data(topojson.feature(map, map.objects["countries"]).features)
+                              .enter()
+                            .append("g")
+                              .attr("class", "labelGroup hover shadow-sm")
+                              .attr("id", d => {
+                                if (d.properties.covid_data == undefined) {
+                                  return "none_data"
+                                } else {
+                                  return "country_" + d.properties.name;
+                                }
+                              })
+                              .attr("transform", d => `translate(${geoPath.centroid(d)[0]}, ${geoPath.centroid(d)[1]})`)
+                              .each(() => d3.selectAll("#none_data").remove());
+        // Add the text to the label group showing country name
+        labelGroup.append("text")
+                    .attr("id", function(d, i) {
+                      return d.properties.name;
+                    })
+                    .text(d => {
+                      if (d.properties.covid_data != undefined) {
+                        return d.properties.name
+                      }})
+                    .attr("transform", function(d) {
+                      if (d.properties.covid_data != undefined) {
+                        if (d.properties.name == 'Croatia' || d.properties.name == 'Albania' || d.properties.name == 'Jamaica') {
+                          return `translate(-${myBubble(d.properties.covid_data['total_cases_per_million']) * 4}, ${myBubble(d.properties.covid_data['total_cases_per_million']) * 2.2})`
+                        } else if (d.properties.name == 'Montenegro') {
+                          return `translate(-${myBubble(d.properties.covid_data['total_cases_per_million']) * 4.6}, 14)`
+                        } else {
+                          return `translate(${myBubble(d.properties.covid_data['total_cases_per_million']) + 3}, 4)`
+                        }
+                    }})
+                    .attr("font-size", ".7rem");
+        // Add a circle to the center of country showing amount of total cases
+        labelGroup.append("circle")
+                  .attr("class", "bubbles")
+                  .attr('r', function(d) {
+                    if (d.properties.covid_data != undefined) {
+                      return myBubble(d.properties.covid_data['total_cases_per_million'])
+                    }})
+                  .attr('fill', function(d) {
+                    if (d.properties.covid_data != undefined) {
+                      return myColor(d.properties.covid_data['new_cases_index'])
+                  }})
+                  .style('stroke', '#474849');
+        // Add the flag to the label group showing the signal of the average active new cases curve by its color
+        labelGroup.append("g")
+                  .attr("class", "svg_flag")
+                  .attr("id", function(d, i) {
+                    return "flag_"+ d.properties.name;
+                    })
+                  .attr("transform", function(d) {
+                    if (d.properties.covid_data != undefined) {
+                      return `translate(0, -22)`
+                  }})
+                  .html(d => {
+                    if (d.properties.covid_data != undefined) {
+                      return `<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                      style="enable-background:new 0 0 17.9 17.7;" xml:space="preserve">
+                      <style type="text/css">
+                        .st0{fill:#424242;}
+                        .st1{fill:#8C8C8C;}
+                        .st2{fill:#727272;}
+                        .st3{fill:#474849;}
+                        .st4{fill:#A2A2A3;}
+                      </style>
+                      <rect x="4.6" y="9.6" class="st0" width="3.3" height="2"/>
+                      <path class="st1" d="M7.8,12.7h10.1l-3.6-4.9l3.6-4.9H7.8v8.3V12.7z"/>
+                      <path class="st2" d="M4.6,11.5c0,0.6,0.6,1.1,1.3,1.1h1.3h0.7v-2.3h-2C5.2,10.4,4.6,10.9,4.6,11.5z"/>
+                      <path class="st3" d="M0.3,0C0.1,0,0,0.1,0,0.3l0,0v17c0,0.2,0.1,0.3,0.3,0.3s0.3-0.1,0.3-0.3v-17l0,0C0.7,0.1,0.5,0,0.3,0z"/>
+                      <rect x="0.7" y="1.3" class="st4" width="7.2" height="9.1"/>
+                      </svg>`}
+                  });
+      
+        // Show Tooltip on hovor
+        labelGroup.on('mouseover', function(d) {
+            tooltip.attr('class', 'tooltip');
+            fill_color = myColor(d.properties.covid_data['new_cases_index']);
+            tooltip.classed('hidden', false)
+                  .attr('style', 'left:' + (d3.event.pageX - 120) + 'px; top:' + (d3.event.pageY - 200) + 'px')
+                  .html(() => {
+                      let compare_with_yesterday = d.properties.covid_data.reported_yesterday > 0 ? "+" + d.properties.covid_data.reported_yesterday.toLocaleString().toString() : d.properties.covid_data.reported_yesterday.toLocaleString()
+                      return `<table>
+                          <thead>
+                            <tr><th colspan="2" class="text-center pb-2">${d.properties.name}</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><td class="pb-3"><small>Border opened on</small></td><td class="text_right bold pb-3">${d.properties.covid_data.availabile_date_for_trip}</td></tr>
+                            <tr class="border-top"><td class="pt-2"><small>Confirmed Cases per 1M</small></td><td class="text_right pt-2"><small>${d.properties.covid_data.total_cases_per_million.toLocaleString()}</small></td></tr>
+                            <tr><td><small>Total Death per 1M</small></td><td class="text_right"><small>${d.properties.covid_data.total_deaths_per_million}</small></td></tr>
+                            <tr><td class="pb-3"><small>Reported Yesterday</small></td><td class="text_right pb-3"><small>${compare_with_yesterday}</small></td></tr>
+                            <tr class="border-top"><td><small>New cases per 1M (last 60 days)</small></td><td class="new_case_trends"></td></tr>
+                            <tr><td><small>New cases Variations Index</small></td><td class="text_right" style="color:${fill_color}"><small>${d.properties.covid_data.new_cases_index}</small></td></tr>
+                          </tbody>
+                          </table>`
+                  })
+                  .each(() => {
+                      let new_cases_60days = d.properties.covid_data.data,
+                          margin = {top: 5, right: 2, bottom: 3, left: 8},
+                          width = 70,
+                          height = 10,
+                          parseDate = d3.timeParse("%Y-%m-%d"),
+                          formatDate = d3.timeFormat("%b %m, %Y"),
+                          maxY = d3.max(new_cases_60days, d => d.index),
+                          xScale = d3.scaleTime().range([0, width]).domain(d3.extent(new_cases_60days, d => parseDate(d.date))),
+                          yScale = d3.scaleLinear().range([height, 0]).domain([0, maxY]),
+                          // Set the area
+                          area = d3.area()
+                                  .x(function(d) { return xScale(parseDate(d.date)); })
+                                  .y0(function() { return yScale(0); })
+                                  .y1(function(d) { return yScale(d.index); }),
+                          svg = d3.select('.new_case_trends')
+                                    .attr("class", 'new_case_trends svg')
+                                  .append("svg")
+                                    .attr("width", width + margin.left + margin.right)
+                                    .attr("height", height + margin.top + margin.bottom)
+                                  .append("g")
+                                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                      // Add area
+                      svg.append("path")
+                          .attr("class", "area")
+                          .attr("fill", fill_color)
+                          .style("stroke", fill_color)
+                          .style("stroke-width", 1.5)
+                          .attr("d", area(new_cases_60days));
+              });
             })
-            .attr("class", "zoomFlag")
-            // add an onclick action to zoom into clicked country
-            .on("click", function(d, i) {
-              var zoom_active = d3.select(this).classed("zoomIn") ? false : true;
-              if (zoom_active) {
-                d3.selectAll(".zoomFlag").classed("country-on", false);
-                d3.select(this).classed("country-on", true);
-                d3.select(this).classed("zoomIn", true);
-                d3.select(this).style("display", "block");
-                boxZoom(geoPath.bounds(d), geoPath.centroid(d), 20);
-                zoom_active = false;
-                console.log('active', zoom_active)
-              } else {
-                d3.selectAll(".zoomFlag").classed("country-on", false);
-                d3.select(this).classed("zoomIn", false);
-
-                initZoom(svg, w, h);
-                zoom_active = true;
-                console.log('inactive', zoom_active)
-              }
+            .on('mouseout', function() {
+                tooltip.classed('hidden', true);
             });
-  
-  // Add a label group to each feature/country. This will contain the country name and a background rectangle
-  countryLabels = svg.append("g")
-                     .attr("id", "countryLabels");
-  // add the text to the label group showing country name
-  // countryLabels.selectAll(".countryName")
-  //              .data(topojson.feature(map, map.objects["countries"]).features)
-  //              .enter()
-  //              .append("text")
-  //              .attr("class", "countryName")
-  //              .text(function(d) {
-  //                return d.properties.name;
-  //              })
-  //              .attr("transform", function(d) {
-  //               return "translate(" + (geoPath.centroid(d)[0] -20) + "," + (geoPath.centroid(d)[1]+20) + ")";
-  //             })
-  // add a background rectangle the same size as the text
-  countryLabels.selectAll(".canGo")
-               .data(topojson.feature(map, map.objects["countries"]).features)
-               .enter()
-              //  .append("rect")
-              //  .attr("class", "canGo")
-              //  .attr('x', d => geoPath.bounds(d)[0][0])
-              //  .attr('y', d => geoPath.bounds(d)[0][1])
-              //  .attr('width', d => geoPath.bounds(d)[1][0] - geoPath.bounds(d)[0][0])
-              //  .attr('height', d => geoPath.bounds(d)[1][1] - geoPath.bounds(d)[0][1]);
-}
-const initZoom = function(svg, w, h){
-  minZoom = 1;
-  maxZoom = 3 * minZoom;
-  zoom.scaleExtent([minZoom, maxZoom]).translateExtent([[0, 0], [w, h]]);
-  // define X and Y offset for centre of map to be shown in centre of holder
-  midX = (w - minZoom * w) / 2;
-  midY = (h - minZoom * h) / 2;
-  // change zoom transform to min zoom and centre offsets
-  svg.call(zoom.transform, d3.zoomIdentity.translate(midX, midY).scale(minZoom));
-};
-
-// zoom to show a bounding box, with optional additional padding as percentage of box size
-const boxZoom = function(box, centroid, paddingPerc) {
-  // d3.path().bounds() returns [[left, top], [right, bottom]]
-  minXY = box[0];
-  maxXY = box[1];
-  zoomWidth = Math.abs(minXY[0] - maxXY[0]);
-  zoomHeight = Math.abs(minXY[1] - maxXY[1]);
-  // find midpoint of map area defined
-  zoomMidX = centroid[0];
-  zoomMidY = centroid[1];
-  // increase map area to include padding
-  zoomWidth = zoomWidth * (1 + paddingPerc / 100);
-  zoomHeight = zoomHeight * (1 + paddingPerc / 100);
-  // find scale required for area to fill svg
-  maxXscale = w / zoomWidth;
-  maxYscale = h / zoomHeight;
-  zoomScale = Math.min(maxXscale, maxYscale);
-  // console.log('1: ',zoomScale)
-  // HANDLE THE EDGE CASES
-  // limit to max zoom (handles tiny countries)
-  zoomScale = Math.min(zoomScale, maxZoom);
-  // console.log('2: ',zoomScale, maxZoom)
-  // limit to min zoom (handles large countries and countries that span the date line)
-  zoomScale = Math.max(zoomScale, minZoom);
-  // console.log('3: ',zoomScale, minZoom)
-  // Find screen pixel equivalent once scaled
-  offsetX = zoomScale * zoomMidX;
-  offsetY = zoomScale * zoomMidY;
-
-  // Find offset to centre, making sure no gap at left or top of holder
-  dleft = Math.min(0, w / 2 - offsetX);
-  dtop = Math.min(0, h / 2 - offsetY);
-  // Make sure no gap at bottom or right of holder
-  dleft = Math.max(w - w * zoomScale, dleft);
-  dtop = Math.max(h - h * zoomScale, dtop);
-
-  // set zoom
-  svg.transition().duration(500)
-     .call(
-       zoom.transform,
-       d3.zoomIdentity.translate(dleft, dtop).scale(zoomScale)
-     );
 };
 
 // GET MAP/COVID19 DATA from '/api'
 Promise.all([
 
     d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
-    d3.json(base_url+"/api"),
+    // d3.json(base_url+"/api"),
+    d3.json("https://covid.ourworldindata.org/data/owid-covid-data.json"),
     d3.json(base_url+"/cango")
 
 ]).then(([map, api, cango]) => {
 
   d3.selectAll('.loading').remove();
-  console.log('map: ', map);
-  console.log('cango: ', cango);
-  
+
+  // convert api, cango data into covid_data
+  let covid_data = {},
+      abbreviations = Object.keys(api),
+      replacements = {},
+      map_w_covid = {};
+
+  abbreviations.map(abb => {
+    for (var country in cango['list']) {
+      let days = 60; // Days you want to subtract
+          date = new Date(),
+          last = new Date(date.getTime() - (days * 24 * 60 * 60 * 1000)),
+          day = last.getDate().toString().length == 1 ? "0" + last.getDate() : last.getDate(),
+          month = (last.getMonth() + 1).toString().length == 1 ? "0" + (last.getMonth() + 1) : last.getMonth() + 1,
+          year = last.getFullYear();
+
+      if (country == 'North Macedonia' || country == 'Bali (Indonesia)') {
+        let re = /(\w+)\s\({0,}(\w+)\){0,}/;
+        replacements[country] = country.replace(re, '$2');
+        country = country.replace(re, '$2');
+      } else if (country == 'Dubai (UAE)') {
+        replacements[country] = 'United Arab Emirates';
+        country = 'United Arab Emirates'
+      }
+
+      if (country == api[abb]['location'] && api[abb]['data'][(api[abb]['data'].length)-1]['total_cases_per_million'] != 'undefined') {
+        var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
+        infos['total_cases_per_million'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['total_cases_per_million']);
+        infos['total_deaths_per_million'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['total_deaths_per_million']);
+        infos['reported_yesterday'] = parseInt(api[abb]['data'][(api[abb]['data'].length)-1]['new_cases_per_million'] - api[abb]['data'][(api[abb]['data'].length)-2]['new_cases_per_million']).toFixed(2);
+        infos['hospital_beds_per_thousand'] = api[abb]['hospital_beds_per_thousand'];
+        let replacedItems = Object.keys(cango['list']).map((key) => {
+          const newKey = replacements[key] || key;
+          return { [newKey] : cango['list'][key] };
+        });
+        const new_cango = replacedItems.reduce((a, b) => Object.assign({}, a, b));
+        infos['availabile_date_for_trip'] = new_cango[country];
+        api[abb]['data'].forEach(item => {
+          if (item['date'] == year + '-' + month + '-' + day) {
+            arr_60days[flag] = {'date': item['date'], 'index': parseInt(item['new_cases_per_million'])};
+            flag = flag + 1;
+          } else if (flag > 0) {
+            arr_60days[flag] = {'date': item['date'], 'index': parseInt(item['new_cases_per_million'])};
+            flag = flag + 1;
+          }
+        })
+        for (var i = 1; i < arr_60days.length; i++) {
+          count_indices = (arr_60days[i]['index'] - arr_60days[i - 1]['index']) + count_indices;
+        }
+        infos['new_cases_index'] = parseInt(count_indices);
+        infos['data'] = arr_60days;
+        covid_data[api[abb]['location']] = infos;
+      } else {
+        var infos = {}, arr_60days = [], flag = 0, count_indices = 0;
+        infos['total_cases_per_million'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['total_cases_per_million']);
+        infos['total_deaths_per_million'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['total_deaths_per_million']);
+        infos['reported_yesterday'] = parseInt(api['USA']['data'][(api['USA']['data'].length)-1]['new_cases_per_million'] - api['USA']['data'][(api['USA']['data'].length)-2]['new_cases_per_million']).toFixed(2);
+        infos['availabile_date_for_trip'] = 'States differ';
+        infos['hospital_beds_per_thousand'] = api['USA']['hospital_beds_per_thousand'];
+        api['USA']['data'].forEach((item, i) => {
+          if (item['date'] == year + '-' + month + '-' + day) {
+            arr_60days[flag] = {'date': item['date'], 'index': parseInt(item['new_cases_per_million'])};
+            flag = flag + 1;
+          } else if (flag > 0) {
+            arr_60days[flag] = {'date': item['date'], 'index': parseInt(item['new_cases_per_million'])};
+            flag = flag + 1;
+          }
+        })
+        for (var i = 1; i < arr_60days.length; i++) {
+          count_indices = (arr_60days[i]['index'] - arr_60days[i - 1]['index']) + count_indices;
+        }
+        infos['new_cases_index'] = parseInt(count_indices);
+        infos['data'] = arr_60days;
+        covid_data['United States of America'] = infos;
+      }
+    }
+  })
+
+  // convert covid_data into map == Primary dataset!!
+  map['objects']['countries']['geometries'].map(geometries => {
+    for (const key in geometries) {
+      // console.log(geometries[key]['name'])
+      for (var d in covid_data) {
+        if (d == 'Dominican Republic') {
+          var old_name = d;
+          d = 'Dominican Rep.';
+        }
+        if(key == 'properties' && d == geometries[key]['name']) {
+          if (d == 'Dominican Rep.') {
+            geometries[key]['covid_data'] = covid_data[old_name];
+            map_w_covid[old_name] = covid_data[old_name];
+          } else {
+            geometries[key]['covid_data'] = covid_data[d];
+            map_w_covid[d] = covid_data[d];
+          }
+        }
+      }
+    }
+  });
+
   d3.select('.find_update').text(cango['updted_date']);
-  initCountry(svg, w, h, map);
-  initZoom(svg, w, h);
+
+  let tr = d3.select('.table tbody')
+           .selectAll('tr')
+             .data(Object.entries(map_w_covid))
+             .enter()
+           .append('tr')
+             .attr('class', 'small');
+  tr.selectAll("td")
+      .data(d => d)
+      .enter()
+    .append("td")
+      .text((d, i) => {
+        if (i == 1) {
+          return d.availabile_date_for_trip;
+        } else {
+          return d;
+        }
+      });
+  initCountry(svg, w, h, map, map_w_covid);
 
   // ON WINDOW RESIZE
   d3.select(window).on('resize', ()=> {
@@ -183,83 +460,14 @@ Promise.all([
       h = parseInt(d3.select('#map').style('height'));
       svg = d3.select(".init-map")
         .attr("width", w)
-        .attr("height", h)
-        .call(zoom);
-      
-      console.log(w, '|', h);
-      d3.selectAll('#countries').remove();
-      initCountry(svg, w, h, map);
-      initZoom(svg, w, h);
+        .attr("height", h);
+      d3.selectAll('#mapGroup').remove();
+      d3.selectAll('#legendGroup').remove();
+      d3.selectAll('#labelGroup').remove();
+      d3.selectAll('.tooltip.hidden').remove();
+      initCountry(svg, w, h, map, map_w_covid);
   });
 
 }).catch(function(err) {
   if (err) return console.warn(err);
 });
-
-  
-// countries = topojson.feature(map, map.objects["countries"]).features,
-//       // mesh = topojson.mesh(map, map.objects["countries"], (a, b)=> a != b),
-//       geoPath = d3.geoPath().projection(projection);
-  
-//   svg.selectAll(".country")
-//      .data(countries)
-//      .enter()
-//      .attr("class", "country")
-//      .attr("d", geoPath);
-
-
-  // function generateTableHead(table, data) {
-//   let thead = table.createTHead();
-//   let row = thead.insertRow();
-//   for (let key of data) {
-//     let th = document.createElement("th");
-//     let text = document.createTextNode(key);
-//     th.appendChild(text);
-//     row.appendChild(th);
-//   }
-// }
-
-// function generateTable(table, data) {
-//   for (let element of data) {
-//     let row = table.insertRow();
-//     for (key in element) {
-//       let cell = row.insertCell();
-//       let text = document.createTextNode(element[key]);
-//       cell.appendChild(text);
-//     }
-//   }
-// }
-
-// let width = '100%';
-// let height = 520;
-// let projection = d3.geoMercator()
-//     .center([-76.6180827, 39.323953])
-//     .scale([140000])
-//     .translate([270, 165]);
-// let geoGenerator = d3.geoPath().projection(projection);
-// let svg = d3.select("#map").append('svg')
-//     .style("width", width)
-//     .style("height", height);
-
-// const apiData = fetch(base_url_+'/api',{
-//   method : 'GET',
-//   headers: {
-//     'Accept' : 'application/JSON, text/plain, */*',
-//     'Content-type' : 'application/json'
-// }
-// })
-// .then(res => res.json())
-// .then(data => {
-// console.log('* ', data);
-// // new_data = Object.assign({'#': [...Array(data[key]['data'].length).keys()]}, data);
-// // console.log('$', new_data);
-// for (const key in data) {
-//   // data[key]['location'], data[key]['median_age'], data[key]['population_density'], data[key]['cvd_death_rate'], data[key]['gdp_per_capita'], data[key]['life_expectancy'], data[key]['data']>['date']['new_cases'], ['new_cases_per_million'], ['new_deaths'], ['new_deaths_per_million'], ['stringency_index'], ['total_cases'], ['total_cases_per_million'], ['total_deaths'], ['total_deaths_per_million']
-  
-//   // let table = document.querySelector("table");
-//   // let data = Object.keys(mountains[0]);
-//   // generateTableHead(table, data[key]['location']);
-//   // generateTable(table, data);
-// } 
-// })
-// .catch(err => console.log("err on getting API Data: ", err));

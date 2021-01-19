@@ -1,31 +1,39 @@
-/* map */
-#map {
-  width: 100vw;
-  height: 70vh;
-  background-color: #98b2cf;;
+body {font-family: 'Manrope', sans-serif; font-weight: 500;}
+#map {width: 100vw;height: 44vh;}
+.small, small {font-size: 84% !important; font-weight: 500 !important;}
+.back_color {fill: #D1DBE1; background-color: #D1DBE1;}
+.back2_color {background-color:#edeff4;}
+.country_path{stroke: #D1DBE1; /* country border colour */stroke-width: 1; /* country border width */} 
+.hover {cursor: pointer;}
+th, td {padding: .4rem 0 0;}
+.text_right { text-align: right; }
+.bold {font-weight: 700 !important;}
+.hidden {display: none;}
+.bubbles {opacity: .8;}
+.table tr {line-height: 0.2rem;}
+.tooltip{
+  color: #fff;
+  background-color: #222;
+  padding: 1.2rem 1.8rem;
+  line-height: .8rem;
+  border-radius: .2rem;
+  opacity: .88;
+  position: absolute;
 }
-svg rect {
-  fill: #98b2cf;   /* map background colour */
+.legend_info {
+  color: #222;
+  background-color: #fff;
+  padding: 1.1rem 1.1rem 0.2rem 1.2rem;
+  line-height: .8rem;
+  border-radius: .2rem;
+  opacity: .82;
+  font-size: .68rem;
+  position: absolute;
+  width: 220px;
 }
-.zoomFlag{
-  fill: #f1f1ee;   /* country colour */
-  stroke: #5172973d; /* country border colour */
-  stroke-width: 1.2; /* country border width */
-} 
-.country-on{
-  stroke: #000;/* #77cfbc;   highlight colour for selected country */
-  stroke-width: .4;
-}
-.countryLabels{
-  display: none;   /* hide all country labels by default */
-}
-.canGo {
-  fill: none;
-  stroke: #333;
-  stroke-dasharray: 2,1;
-}
+
 /* others */
-.title {font-size: 1.1rem; line-height: 2rem;}
+.title {font-size: 1.1rem; line-height: 1rem;}
 .bubble {
     position: absolute;
     top: 30%;
@@ -111,4 +119,3 @@ svg rect {
       height: 14vh;
     }
   }
-  
