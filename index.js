@@ -38,36 +38,37 @@ app
       got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
         let content = {}, list = {};
         const dom = new JSDOM(res.body);
-        console.log()
-        if (typeof dom.window.document.querySelector('.post-last-modified-td').textContent == 'string') {
-          content['updted_date'] =  dom.window.document.querySelector('.post-last-modified-td').textContent; //#post-modified-info
+        if (typeof dom.window.document.querySelector('.post-modified-info').textContent == 'string') {
+          content['updted_date'] =  dom.window.document.querySelector('.post-modified-info').textContent; //#post-modified-info
         } else {
-          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.updated').textContent;
+          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.posted-on').lastChild.textContent;
         }
-        const list_title = dom.window.document.querySelector(".elementor-element-fe352ed").firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.textContent;
-        content['title'] = list_title;
-        const countryList = dom.window.document.querySelector(".elementor-element-fe352ed").firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.firstElementChild.nextElementSibling.childNodes;
-        countryList.forEach((country, i) => {
-          console.log('*', country.textContent)
-          var name, date;
-          const calendar = [' January', ' February', ' March', ' April', ' May', ' June', ' July', ' August', ' September', ' October', ' November', ' December'];
-          if (country.textContent.includes(' – ')) {
-            name = country.textContent.split(' – ')[0];
-            date = country.textContent.split(' – ')[1];
-          } else {
-            calendar.forEach(d => {
-              if (country.textContent.includes(d)) {
-                name = country.textContent.split(d)[0];
-                date = d + country.textContent.split(d)[1];
-              }
-            });
-          }
-          if (date.includes('&')) {
-            date = date.replace('&nbsp;', '')
-          }
-          list[name] = date;
-          content['list'] = list;
-        });
+        const countryListTitle = dom.window.document.querySelectorAll('h4')[0]
+        if (countryListTitle.textContent.includes('Where can Americans Travel Right Now?')) {
+          const countryList = countryListTitle.nextElementSibling.childNodes
+          countryList.forEach((country, i) => {
+            var name, date;
+            const calendar = [' January', ' February', ' March', ' April', ' May', ' June', ' July', ' August', ' September', ' October', ' November', ' December'];
+            if (country.firstChild.textContent.includes(' – ')) {
+              name = country.firstChild.textContent.split(' – ')[0];
+              date = country.firstChild.textContent.split(' – ')[1];
+            } else {
+              calendar.forEach(d => {
+                if (country.firstChild.textContent.includes(d)) {
+                  name = country.firstChild.textContent.split(d)[0];
+                  date = d + country.firstChild.textContent.split(d)[1];
+                }
+              });
+            }
+            if (date.includes('&')) {
+              date = date.replace('&nbsp;', '')
+            }
+            list[name] = date;
+            content['list'] = list;
+          });
+        } else {
+          content['list'] = {'Country list' : 'Fail to load'};
+        }
         return response.json(content);
       });
   });
