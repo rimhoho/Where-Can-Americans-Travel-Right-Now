@@ -38,10 +38,10 @@ app
       got("https://www.traveloffpath.com/countries-that-have-reopened-for-american-tourists/").then(res => {
         let content = {}, list = {};
         const dom = new JSDOM(res.body);
-        if (typeof dom.window.document.querySelector('.post-modified-info').textContent == 'string') {
-          content['updted_date'] =  dom.window.document.querySelector('.post-modified-info').textContent; //#post-modified-info
+        if (typeof dom.window.document.querySelector('.post-last-modified-td').textContent == 'string') {
+          content['updted_date'] =  dom.window.document.querySelector('.post-last-modified-td').textContent; //#post-modified-info
         } else {
-          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.posted-on').lastChild.textContent;
+          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.entry-date').textContent;
         }
         const countryListTitle = dom.window.document.querySelectorAll('h4')[0]
         if (countryListTitle.textContent.includes('Where can Americans Travel Right Now?')) {
