@@ -434,7 +434,6 @@ Promise.all([
   });
 
   d3.select('.find_update').text(cango['updted_date']);
-
   let tr = d3.select('.table tbody')
            .selectAll('tr')
              .data(Object.entries(map_w_covid))
@@ -446,6 +445,7 @@ Promise.all([
       .enter()
     .append("td")
       .text((d, i) => {
+        // console.log(i, d)
         if (i == 1) {
           return d.availabile_date_for_trip;
         } else {

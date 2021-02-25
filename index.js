@@ -41,7 +41,7 @@ app
         if (typeof dom.window.document.querySelector('.post-last-modified-td').textContent == 'string') {
           content['updted_date'] =  dom.window.document.querySelector('.post-last-modified-td').textContent; //#post-modified-info
         } else {
-          content['updted_date'] =  'Last Updated on ' + dom.window.document.querySelector('.entry-date').textContent;
+          content['updted_date'] =  dom.window.document.querySelector('.entry-date').textContent;
         }
         const countryListTitle = dom.window.document.querySelectorAll('h4')[0]
         if (countryListTitle.textContent.includes('Where can Americans Travel Right Now?')) {
